@@ -1,0 +1,10 @@
+const router = require('express').Router();
+
+router.get('/health', (req, res) => res.json({ status: 'ok' }));
+router.use('/auth', require('./auth.routes'));
+router.use('/alat', require('./alat.routes'));
+router.use('/pemesanan', require('./pemesanan.routes'));
+router.use('/pembayaran', require('./pembayaran.routes'));
+router.use('/pengembalian', require('./pengembalian.routes'));
+
+module.exports = router;
