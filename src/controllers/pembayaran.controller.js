@@ -1,68 +1,73 @@
-const pool = require('../config/db');
-const AppError = require('../utils/AppError');
-const { ok } = require('../utils/response');
+const db = require('../config/db');
+const { success, fail } = require('../utils/response');
 
-exports.create = async (req, res) => {
-  const { id_pemesanan, jumlah_bayar, metode_pembayaran, bukti_bayar } = req.body;
-  const [rows] = await pool.execute(
-    'SELECT id_user, status_pemesanan FROM pemesanan WHERE id_pemesanan = ?',
-    [id_pemesanan]
-  );
-  if (!rows.length) throw new AppError('Pemesanan tidak ditemukan', 404);
-  if (rows[0].id_user !== req.user.id) throw new AppError('Akses ditolak', 403);
-  if (['selesai', 'dibatalkan'].includes(rows[0].status_pemesanan)) {
-    throw new AppError('Pemesanan sudah ditutup', 409);
-  }
+// Sesuai schema_sewa_camping.sql:
+// pembayaran(id_pembayaran, id_pemesanan, tanggal_bayar, jumlah_bayar, metode_pembayaran, bukti_bayar, status_pembayaran)
+//   status_pembayaran: menunggu | berhasil | ditolak
+// Status pesanan: menunggu (belum lunas) -> dibayar (admin sudah verifikasi)
 
-  const [r] = await pool.execute(
-    `INSERT INTO pembayaran (id_pemesanan, jumlah_bayar, metode_pembayaran, bukti_bayar)
-     VALUES (?, ?, ?, ?)`,
-    [id_pemesanan, jumlah_bayar, metode_pembayaran, bukti_bayar || null]
-  );
-  ok(res, { id_pembayaran: r.insertId }, 'Pembayaran dikirim, menunggu verifikasi', 201);
+// Pelanggan: upload bukti bayar. form-data: bukti (file), metode_pembayaran (opsional, default 'transfer')
+exports.upload = async (req, res) => {
+  try {
+    if (!req.file) return fail(res, 'File bukti bayar wajib diunggah (field: bukti)');
+
+    const [[p]] = await db.query('SELECT * FROM pemesanan WHERE id_pemesanan = ?', [req.params.id]);
+    if (!p) return fail(res, 'Pesanan tidak ditemukan', 404);
+    if (p.id_user !== req.user.id) return fail(res, 'Bukan pesanan kamu', 403);
+    if (p.status_pemesanan !== 'menunggu') return fail(res, 'Pesanan ini tidak sedang menunggu pembayaran');
+
+    const [[tunggu]] = await db.query(
+      "SELECT COUNT(*) AS n FROM pembayaran WHERE id_pemesanan = ? AND status_pembayaran = 'menunggu'", [p.id_pemesanan]);
+    if (tunggu.n > 0) return fail(res, 'Bukti bayar sebelumnya masih menunggu verifikasi admin', 409);
+
+    const path = `uploads/bukti/${req.file.filename}`;
+    const metode = (req.body.metode_pembayaran || 'transfer').slice(0, 50);
+    const [r] = await db.query(
+      `INSERT INTO pembayaran (id_pemesanan, jumlah_bayar, metode_pembayaran, bukti_bayar, status_pembayaran)
+       VALUES (?, ?, ?, ?, 'menunggu')`,
+      [p.id_pemesanan, p.total_harga, metode, path]);
+
+    return success(res, { id_pembayaran: r.insertId, bukti_bayar: path },
+      'Bukti bayar terkirim, menunggu verifikasi admin', 201);
+  } catch (e) { console.error(e); return fail(res, 'Server error', 500); }
 };
 
-// Admin memverifikasi: berhasil / ditolak
-exports.verifikasi = async (req, res) => {
-  const { status } = req.body;
-  const conn = await pool.getConnection();
+// Admin: daftar pembayaran (opsional ?status=menunggu)
+exports.daftar = async (req, res) => {
   try {
-    await conn.beginTransaction();
-    const [rows] = await conn.execute(
-      'SELECT id_pemesanan FROM pembayaran WHERE id_pembayaran = ? FOR UPDATE',
-      [req.params.id]
+    const { status } = req.query;
+    const [rows] = await db.query(
+      `SELECT b.*, p.total_harga, u.nama AS nama_penyewa
+       FROM pembayaran b
+       JOIN pemesanan p ON p.id_pemesanan = b.id_pemesanan
+       JOIN users u ON u.id_user = p.id_user
+       ${status ? 'WHERE b.status_pembayaran = ?' : ''} ORDER BY b.id_pembayaran DESC`,
+      status ? [status] : []
     );
-    if (!rows.length) throw new AppError('Pembayaran tidak ditemukan', 404);
-    const idPemesanan = rows[0].id_pemesanan;
+    return success(res, rows);
+  } catch (e) { console.error(e); return fail(res, 'Server error', 500); }
+};
 
-    await conn.execute('UPDATE pembayaran SET status_pembayaran = ? WHERE id_pembayaran = ?', [
-      status,
-      req.params.id,
-    ]);
+// Admin: verifikasi. body: { "status": "berhasil" | "ditolak" }
+exports.verifikasi = async (req, res) => {
+  const conn = await db.getConnection();
+  try {
+    const { status } = req.body;
+    if (!['berhasil', 'ditolak'].includes(status)) return fail(res, "status harus 'berhasil' atau 'ditolak'");
 
+    await conn.beginTransaction();
+    const [[b]] = await conn.query('SELECT * FROM pembayaran WHERE id_pembayaran = ? FOR UPDATE', [req.params.id]);
+    if (!b) { await conn.rollback(); return fail(res, 'Pembayaran tidak ditemukan', 404); }
+    if (b.status_pembayaran !== 'menunggu') { await conn.rollback(); return fail(res, 'Pembayaran ini sudah diverifikasi'); }
+
+    await conn.query('UPDATE pembayaran SET status_pembayaran = ? WHERE id_pembayaran = ?', [status, b.id_pembayaran]);
+    // berhasil -> pesanan jadi 'dibayar'. ditolak -> pesanan tetap 'menunggu', pelanggan boleh upload ulang
     if (status === 'berhasil') {
-      const [[{ dibayar }]] = await conn.execute(
-        `SELECT COALESCE(SUM(jumlah_bayar), 0) AS dibayar FROM pembayaran
-          WHERE id_pemesanan = ? AND status_pembayaran = 'berhasil'`,
-        [idPemesanan]
-      );
-      const [[p]] = await conn.execute(
-        'SELECT total_harga FROM pemesanan WHERE id_pemesanan = ?',
-        [idPemesanan]
-      );
-      if (Number(dibayar) >= Number(p.total_harga)) {
-        await conn.execute(
-          "UPDATE pemesanan SET status_pemesanan = 'dibayar' WHERE id_pemesanan = ? AND status_pemesanan = 'menunggu'",
-          [idPemesanan]
-        );
-      }
+      await conn.query("UPDATE pemesanan SET status_pemesanan = 'dibayar' WHERE id_pemesanan = ?", [b.id_pemesanan]);
     }
     await conn.commit();
-    ok(res, null, 'Pembayaran diverifikasi');
-  } catch (err) {
-    await conn.rollback();
-    throw err;
-  } finally {
-    conn.release();
-  }
+    return success(res, null, `Pembayaran ${status}`);
+  } catch (e) {
+    await conn.rollback(); console.error(e); return fail(res, 'Server error', 500);
+  } finally { conn.release(); }
 };

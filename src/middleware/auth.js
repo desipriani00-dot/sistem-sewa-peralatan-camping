@@ -1,23 +1,25 @@
 const jwt = require('jsonwebtoken');
-const AppError = require('../utils/AppError');
+const { fail } = require('../utils/response');
 
-// Verifikasi JWT -> req.user = { id, role }
-exports.authenticate = (req, res, next) => {
+// Verifikasi token JWT dari header: Authorization: Bearer <token>
+exports.verifyToken = (req, res, next) => {
   const header = req.headers.authorization || '';
   const token = header.startsWith('Bearer ') ? header.slice(7) : null;
-  if (!token) throw new AppError('Token tidak ditemukan', 401);
+
+  if (!token) return fail(res, 'Token tidak ditemukan', 401);
 
   try {
-    const payload = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = { id: payload.id, role: payload.role };
+    req.user = jwt.verify(token, process.env.JWT_SECRET); // { id, role }
     next();
-  } catch {
-    throw new AppError('Token tidak valid atau kedaluwarsa', 401);
+  } catch (err) {
+    return fail(res, 'Token tidak valid atau sudah kedaluwarsa', 401);
   }
 };
 
-// Batasi akses berdasarkan role, contoh: authorize('admin')
-exports.authorize = (...roles) => (req, res, next) => {
-  if (!roles.includes(req.user.role)) throw new AppError('Akses ditolak', 403);
+// Batasi akses berdasarkan nama role, contoh: requireRole('admin')
+exports.requireRole = (...roles) => (req, res, next) => {
+  if (!req.user || !roles.includes(req.user.role)) {
+    return fail(res, 'Anda tidak punya akses ke resource ini', 403);
+  }
   next();
 };

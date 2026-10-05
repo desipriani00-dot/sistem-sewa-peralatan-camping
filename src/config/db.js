@@ -1,4 +1,5 @@
 const mysql = require('mysql2/promise');
+require('dotenv').config();
 
 const pool = mysql.createPool({
   host: process.env.DB_HOST,
@@ -7,8 +8,8 @@ const pool = mysql.createPool({
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
   waitForConnections: true,
+  dateStrings: true,
   connectionLimit: 10,
-  dateStrings: true, // DATE/DATETIME dikembalikan sebagai string
 });
 
 module.exports = pool;

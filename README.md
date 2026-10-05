@@ -1,34 +1,21 @@
-# Backend / API Sewa Peralatan Camping
+# Sewa Peralatan Camping (MVP tahap 1 sampai rilis akhir, sudah digabung)
 
-Node.js + Express 5 + MySQL (mysql2), autentikasi JWT.
+Isi: katalog dengan filter, pesanan dengan cek stok anti-bentrok, upload bukti bayar, verifikasi admin,
+serah terima dan pengembalian, invoice PDF dengan QR code, dan halaman web (folder `public`).
 
-## Menjalankan
-1. Import `schema_sewa_camping.sql` ke MySQL.
-2. `cp .env.example .env` lalu isi kredensial DB dan `JWT_SECRET`.
-3. `npm install`
-4. `npm run dev`  ->  http://localhost:3000/api/health
+## Cara menjalankan (sekali setup)
+1. Nyalakan MySQL di XAMPP. Di phpMyAdmin, import file `schema_sewa_camping.sql` milikmu.
+2. Buka folder ini di VS Code, lalu buka Terminal dan ketik: `npm install`
+3. Salin `.env.example` menjadi `.env`. Kalau MySQL-mu tanpa password, isi tidak perlu diubah selain `JWT_SECRET`.
+4. Ketik: `npm run seed` (membuat akun admin dan 4 alat contoh)
+5. Ketik: `npm start`, lalu buka http://localhost:3000
 
-## Membuat akun admin
-Registrasi lewat API selalu berrole `pelanggan`. Untuk admin, daftar dulu lalu ubah di DB:
-    UPDATE users SET id_role = (SELECT id_role FROM roles WHERE nama_role='admin') WHERE email='admin@contoh.com';
+Login admin: `admin@camping.local` / `admin123`. Pelanggan mendaftar sendiri lewat tombol Masuk, lalu Daftar.
 
-## Endpoint
-| Method | Path | Akses |
-|---|---|---|
-| POST | /api/auth/register, /api/auth/login | publik |
-| GET | /api/auth/me | login |
-| GET | /api/alat, /api/alat/:id | publik (?q=&kategori=&page=&limit=) |
-| POST/PUT/DELETE | /api/alat(/:id) | admin |
-| POST | /api/pemesanan | pelanggan |
-| GET | /api/pemesanan, /api/pemesanan/:id | login (pelanggan hanya miliknya) |
-| PATCH | /api/pemesanan/:id/status | admin (dipinjam / dibatalkan) |
-| POST | /api/pembayaran | pelanggan |
-| PATCH | /api/pembayaran/:id/verifikasi | admin (berhasil / ditolak) |
-| POST | /api/pengembalian | admin |
+## Urutan mencoba
+Pelanggan: Katalog, Tambah ke keranjang, isi tanggal, Pesan, kirim bukti bayar.
+Admin: tab Pembayaran (Terima), tab Pesanan (Serahkan, lalu Kembalikan). Pelanggan lalu bisa unduh Invoice PDF.
 
-## Alur status pemesanan
-menunggu -> (pembayaran diverifikasi lunas) dibayar -> (admin) dipinjam -> (pengembalian dicatat) selesai
-Pembatalan oleh admin dari status menunggu/dibayar/dipinjam mengembalikan stok.
-
-## Struktur
-src/config (db) | middleware (auth, validate, errorHandler) | routes | controllers | services (transaksi pemesanan & pengembalian)
+## Catatan
+Kode disesuaikan dengan `schema_sewa_camping.sql` (7 tabel). Foto bukti tersimpan di folder `uploads` (otomatis dibuat).
+Ubah data alat lewat API (`PUT /api/alat/:id`). Di halaman admin baru tersedia tambah dan hapus alat.

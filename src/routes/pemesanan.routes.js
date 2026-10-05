@@ -1,27 +1,14 @@
 const router = require('express').Router();
-const { body, param } = require('express-validator');
-const validate = require('../middleware/validate');
-const { authenticate, authorize } = require('../middleware/auth');
 const c = require('../controllers/pemesanan.controller');
+const invoice = require('../controllers/invoice.controller');
+const { verifyToken, requireRole } = require('../middleware/auth');
 
-router.use(authenticate);
-
-router.post('/',
-  authorize('pelanggan'),
-  body('tanggal_sewa').isISO8601().withMessage('Tanggal sewa tidak valid'),
-  body('tanggal_kembali_rencana').isISO8601().withMessage('Tanggal kembali tidak valid'),
-  body('items').isArray({ min: 1 }).withMessage('Minimal 1 alat'),
-  body('items.*.id_alat').isInt({ min: 1 }),
-  body('items.*.jumlah').isInt({ min: 1 }),
-  validate, c.create);
-
-router.get('/', c.list);
-router.get('/:id', param('id').isInt(), validate, c.detail);
-
-router.patch('/:id/status',
-  authorize('admin'),
-  param('id').isInt(),
-  body('status').isIn(['dipinjam', 'dibatalkan']).withMessage('Status harus dipinjam atau dibatalkan'),
-  validate, c.ubahStatus);
+router.post('/', verifyToken, requireRole('pelanggan'), c.buat);
+router.get('/saya', verifyToken, c.saya);
+router.get('/verifikasi/:id', invoice.verifikasi);            // publik, tujuan QR code
+router.get('/', verifyToken, requireRole('admin'), c.semua);
+router.get('/:id/invoice', verifyToken, invoice.unduh);
+router.get('/:id', verifyToken, c.detail);
+router.patch('/:id/batal', verifyToken, c.batalkan);
 
 module.exports = router;

@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="id"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sewa Peralatan Camping</title>
+<style>
+:root{--bg:#eef2ee;--card:#fff;--ink:#17241f;--mut:#5d6f66;--pri:#2c5f4a;--lamp:#e3b23c;--line:#d5ded7}
+@media(prefers-color-scheme:dark){:root{--bg:#111a16;--card:#1a2620;--ink:#e6efe9;--mut:#93a89d;--pri:#5fae8a;--line:#2b3b33}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "Segoe UI",system-ui,sans-serif}
+header{background:#1f3d2e;color:#fff;padding:.6rem 1rem;display:flex;gap:.4rem;align-items:center;flex-wrap:wrap;position:sticky;top:0;z-index:2}
+header b{margin-right:auto;font-size:1.15rem}
+header button{background:none;border:0;color:#dfeae3;padding:.4rem .6rem;border-radius:6px;cursor:pointer;font:inherit}
+header button:hover,header button:focus-visible{background:#ffffff22;outline:none}
+main{max-width:1000px;margin:auto;padding:1rem}
+h2{margin:.2rem 0 .8rem}h3{margin:.2rem 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:.8rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:.8rem;margin-bottom:.6rem}
+.grid .card{margin:0;border-top:4px solid var(--lamp)}
+.bar,.row{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+.bar{margin-bottom:.6rem}
+input,select{padding:.45rem .5rem;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);font:inherit;max-width:100%}
+.btn{background:var(--pri);color:#fff;border:1px solid var(--pri);padding:.45rem .8rem;border-radius:6px;cursor:pointer;font:inherit}
+.btn.ghost{background:none;color:var(--pri)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--lamp);outline-offset:1px}
+.badge{padding:.1rem .6rem;border-radius:99px;background:var(--line);font-size:.82rem}
+.mut{color:var(--mut);font-size:.88rem}
+#msg{position:fixed;left:50%;bottom:1rem;transform:translateX(-50%);background:#1f3d2e;color:#fff;padding:.6rem 1rem;border-radius:8px;display:none;max-width:90%}
+.hero{background:#1f3d2e;color:#fff;border-radius:10px;padding:1.1rem 1.3rem;margin-bottom:1rem}
+.hero h2{margin:0 0 .2rem}.hero div{color:#cfe0d5}
+.ic{font-size:1.9rem;line-height:1}
+.badge.menunggu{background:#f5e6bf;color:#6b4a00}.badge.dibayar,.badge.dipinjam{background:#cfe8d8;color:#164a2b}
+.badge.dibatalkan{background:#f3d0cc;color:#7a1c14}
+.card b.tot{color:var(--pri)}
+@media(max-width:560px){main{padding:.7rem}.grid{grid-template-columns:1fr 1fr}}
+.app{display:flex;min-height:100vh}
+aside{width:230px;background:#1f5d33;color:#fff;padding:1rem .7rem;display:flex;flex-direction:column;gap:1rem;position:sticky;top:0;height:100vh}
+.brand{font-weight:700;font-size:1.2rem;padding:.4rem .5rem}.brand small{display:block;font-weight:400;font-size:.75rem;color:#cfe6d5}
+#nav{display:flex;flex-direction:column;gap:.2rem;flex:1}
+#nav button{background:none;border:0;color:#e8f4ea;text-align:left;padding:.55rem .7rem;border-radius:8px;cursor:pointer;font:inherit}
+#nav button:hover{background:#ffffff22}#nav button.on{background:#fff;color:#1f5d33;font-weight:600}
+#nav button.out{margin-top:auto;background:#c62828;color:#fff;text-align:center}
+.app main{flex:1;max-width:none;margin:0;padding:1.2rem 1.5rem}
+.stat{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;margin-bottom:.8rem}
+.stat div{border-radius:10px;padding:.8rem;color:#fff;text-align:center}.stat b{display:block;font-size:1.6rem}
+.stat .a{background:#2e7d32}.stat .m{background:#b86e0f}.stat .s{background:#1e6fd0}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:.6rem}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:.8rem;cursor:pointer;font:inherit;color:var(--ink);display:flex;flex-direction:column;align-items:center;gap:.3rem}
+.btn.lamp{background:var(--lamp);border-color:var(--lamp);color:#1f2a1a}
+@media(max-width:760px){.app{flex-direction:column}aside{width:100%;height:auto;position:static}#nav{flex-direction:row;flex-wrap:wrap}#nav button.out{margin-top:0}.app main{padding:.8rem}}
+</style></head><body>
+<div class="app"><aside><div class="brand">SISEPCAMP<small>Sistem Sewa Peralatan Camping</small></div><nav id="nav"></nav></aside><main id="main"></main></div><div id="msg" role="status"></div>
+<script>
+const $=s=>document.querySelector(s),rp=n=>'Rp '+Number(n).toLocaleString('id-ID');
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let U=JSON.parse(localStorage.u||'null'),T=localStorage.t||'',cart=JSON.parse(localStorage.cart||'{}'),F={},A={},tab='alat',reg=0;
+let view='katalog';
+const IC={Tenda:'⛺',Tidur:'🛏️',Masak:'🔥',Tas:'🎒'},hariIni=()=>new Date(Date.now()-new Date().getTimezoneOffset()*6e4).toISOString().slice(0,10);
+const save=()=>localStorage.cart=JSON.stringify(cart),main=h=>$('#main').innerHTML=h;
+let tm;function flash(m){const e=$('#msg');e.textContent=m;e.style.display='block';clearTimeout(tm);tm=setTimeout(()=>e.style.display='none',3500)}
+window.onunhandledrejection=e=>flash(e.reason.message||'Terjadi kesalahan');
+async function api(p,o={}){const h={};if(T)h.Authorization='Bearer '+T;if(o.json){h['Content-Type']='application/json';o.body=JSON.stringify(o.json)}
+ const r=await fetch('/api'+p,{method:o.method,body:o.body,headers:h});if(o.blob&&r.ok)return r.blob();
+ const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.message||'Gagal');return d.data}
+function nav(){const P=[['dashboard','Dashboard'],['katalog','Sewa Peralatan'],['cart','Keranjang ('+Object.keys(cart).length+')'],['pesanan','Pesanan Saya'],['profil','Profil'],['riwayat','Riwayat Sewa'],['lainnya','Lainnya']];
+ const it=!U?[['katalog','Sewa Peralatan'],['cart','Keranjang ('+Object.keys(cart).length+')'],['login','Masuk']]:U.role==='admin'?[['admin','Panel Admin'],['katalog','Lihat Katalog']]:P;
+ $('#nav').innerHTML=it.map(([v,t])=>`<button class="${v===view?'on':''}" onclick="go('${v}')">${t}</button>`).join('')+(U?'<button class="out" onclick="go(\'out\')">Logout</button>':'')}
+async function go(v){if(v==='out'){T='';U=null;localStorage.removeItem('t');localStorage.removeItem('u');v='katalog'}
+ view=v;nav();try{await R[v]()}catch(e){flash(e.message)}}
+const R={
+async katalog(){const q=new URLSearchParams();for(const k in F)if(F[k])q.set(k,F[k]);
+ const [a,k]=await Promise.all([api('/alat?'+q),api('/alat/kategori')]);A={};a.forEach(x=>A[x.id_alat]=x);
+ main(`<div class="hero"><h2>Perlengkapan camping siap sewa</h2><div>Isi tanggal sewa dan kembali untuk melihat sisa stok yang tersedia.</div></div><div class="card bar"><input id="fq" placeholder="Cari alat" value="${esc(F.q)}">
+ <select id="fk"><option value="">Semua kategori</option>${k.map(x=>`<option ${F.kategori===x?'selected':''}>${esc(x)}</option>`).join('')}</select>
+ <input id="fh" type="number" placeholder="Harga maks" value="${esc(F.harga_max)}">
+ <label>Sewa <input id="fm" type="date" min="${hariIni()}" value="${esc(F.mulai)}"></label><label>Kembali <input id="fs" type="date" min="${hariIni()}" value="${esc(F.selesai)}"></label>
+ <label><input id="ft" type="checkbox" ${F.tersedia?'checked':''}> Tersedia saja</label><button class="btn" onclick="cari()">Cari</button></div>
+ <div class="grid">${a.map(x=>`<div class="card"><div class="ic">${IC[x.kategori]||'🏕️'}</div><span class="mut">${esc(x.kategori||'Lainnya')}</span><h3>${esc(x.nama_alat)}</h3>
+ <p class="mut">${esc(x.deskripsi)}</p><b>${rp(x.harga_sewa_per_hari)}</b> per hari<br><span class="mut">Sisa stok ${x.sisa_stok}</span>
+ <div class="row" style="margin-top:.5rem"><input id="n${x.id_alat}" type="number" min="1" value="1" style="width:64px">
+ <button class="btn" ${x.sisa_stok<1?'disabled':''} onclick="add(${x.id_alat})">Tambah</button></div></div>`).join('')||'<p>Belum ada alat yang cocok.</p>'}</div>`)},
+cart(){const ids=Object.keys(cart);
+ main('<h2>Keranjang</h2>'+(ids.length?`<div class="card">${ids.map(i=>`<div class="row"><span style="flex:1">${esc(cart[i].nama)} × ${cart[i].n}</span>
+ <span>${rp(cart[i].harga*cart[i].n)} per hari</span><button class="btn ghost" onclick="del(${i})">Hapus</button></div>`).join('')}
+ <div class="bar" style="margin-top:.8rem"><label>Tanggal sewa <input id="cm" type="date" oninput="est()" min="${hariIni()}" value="${esc(F.mulai)}"></label>
+ <label>Tanggal kembali <input id="cs" type="date" oninput="est()" min="${hariIni()}" value="${esc(F.selesai)}"></label><b class="tot" id="est"></b><button class="btn" onclick="pesan()">Pesan sekarang</button></div></div>`
+ :'<p>Keranjang masih kosong. Pilih alat di Katalog.</p>'));est()},
+login(){main(`<div class="card" style="max-width:360px;margin:1rem auto"><h2>${reg?'Daftar':'Masuk'}</h2><div class="bar" style="flex-direction:column;align-items:stretch">
+ ${reg?'<input id="rn" placeholder="Nama lengkap">':''}<input id="le" type="email" placeholder="Email"><input id="lp" type="password" placeholder="Password">
+ <button class="btn" onclick="auth()">${reg?'Daftar':'Masuk'}</button></div>
+ <a href="#" onclick="reg=!reg;go('login');return false">${reg?'Sudah punya akun? Masuk':'Belum punya akun? Daftar'}</a></div>`)},
+async pesanan(){if(!U)return go('login');const l=await api('/pemesanan/saya'),n=f=>l.filter(p=>f.includes(p.status_pemesanan)).length;
+ main(`<h2>Pesanan saya</h2><div class="stat"><div class="a"><b>${n(['dibayar','dipinjam'])}</b>Aktif</div><div class="m"><b>${n(['menunggu'])}</b>Menunggu</div><div class="s"><b>${n(['selesai'])}</b>Selesai</div></div>`+(l.map(p=>pc(p,0)).join('')||'<p>Belum ada pesanan.</p>'))},
+async dashboard(){if(!U)return go('login');const a=(await api('/alat')).slice(0,4);
+ main(`<div class="hero"><h2>Halo, ${esc(U.nama)} 👋</h2><div>Selamat datang di SISEPCAMP. Yuk sewa perlengkapan camping favoritmu!</div><button class="btn lamp" style="margin-top:.7rem" onclick="go('katalog')">Sewa Sekarang</button></div>
+ <div class="tiles">${[['katalog','⛺','Sewa Peralatan'],['pesanan','📦','Pesanan Saya'],['profil','👤','Profil'],['riwayat','🕘','Riwayat'],['lainnya','⚙️','Lainnya']].map(([v,i,t])=>`<button class="tile" onclick="go('${v}')"><span class="ic">${i}</span>${t}</button>`).join('')}</div>
+ <h3 style="margin:1rem 0 .5rem">Peralatan camping populer</h3><div class="grid">${a.map(x=>`<div class="card"><div class="ic">${IC[x.kategori]||'🏕️'}</div><h3>${esc(x.nama_alat)}</h3><b>${rp(x.harga_sewa_per_hari)}</b> per hari<div style="margin-top:.5rem"><button class="btn" onclick="go('katalog')">Sewa</button></div></div>`).join('')}</div>`)},
+async profil(){if(!U)return go('login');const d=await api('/auth/me');
+ main(`<h2>Profil pelanggan</h2><div class="card"><h3>Data diri</h3><div class="bar" style="flex-direction:column;align-items:stretch;max-width:420px"><input id="pn" placeholder="Nama lengkap" value="${esc(d.nama)}"><input id="pe" type="email" placeholder="Email" value="${esc(d.email)}"><input id="ph" placeholder="No. handphone" value="${esc(d.no_hp)}"><input id="pa" placeholder="Alamat lengkap" value="${esc(d.alamat)}"><button class="btn" onclick="simpanProfil()">Simpan perubahan</button></div></div>
+ <div class="card"><h3>Ubah password</h3><div class="bar" style="flex-direction:column;align-items:stretch;max-width:420px"><input id="p1" type="password" placeholder="Password lama"><input id="p2" type="password" placeholder="Password baru (minimal 6 karakter)"><button class="btn" onclick="ubahPass()">Ubah password</button></div></div>`)},
+async riwayat(){if(!U)return go('login');const l=(await api('/pemesanan/saya')).filter(p=>['selesai','dibatalkan'].includes(p.status_pemesanan));main('<h2>Riwayat sewa</h2>'+(l.map(p=>pc(p,0)).join('')||'<p>Belum ada riwayat sewa.</p>'))},
+lainnya(){main(`<h2>Lainnya</h2><div class="card"><h3>Syarat dan ketentuan</h3><p class="mut">Contoh isi, sesuaikan dengan aturan sewamu: alat dikembalikan sesuai tanggal kembali, kerusakan dan keterlambatan dapat dikenai denda, dan pesanan diproses setelah bukti bayar diverifikasi admin.</p></div><div class="card"><h3>Hubungi admin</h3><p class="mut">WhatsApp: 0812-xxxx-xxxx · Email: admin@contoh.id (ganti dengan kontak aslimu)</p></div>`)},
+async admin(){let h=`<div class="bar">${[['alat','Alat'],['bayar','Pembayaran'],['pesan','Pesanan']].map(([k,v])=>`<button class="btn ${tab===k?'':'ghost'}" onclick="tab='${k}';go('admin')">${v}</button>`).join('')}</div>`;
+ if(tab==='alat'){const a=await api('/alat');h+=`<div class="card bar"><input id="an" placeholder="Nama alat"><input id="ak" placeholder="Kategori"><input id="ah" type="number" placeholder="Harga per hari"><input id="as" type="number" placeholder="Stok"><button class="btn" onclick="tambah()">Tambah alat</button></div>`
+  +a.map(x=>`<div class="card row"><span style="flex:1"><b>${esc(x.nama_alat)}</b> <span class="mut">${esc(x.kategori||'')}</span> · ${rp(x.harga_sewa_per_hari)} · stok ${x.stok}</span><button class="btn ghost" onclick="hapus(${x.id_alat})">Hapus</button></div>`).join('')}
+ if(tab==='bayar'){const b=await api('/pembayaran?status=menunggu');h+=b.map(x=>`<div class="card row"><span style="flex:1">Pesanan #${x.id_pemesanan} · ${esc(x.nama_penyewa)} · ${rp(x.jumlah_bayar)} · <a href="/${esc(x.bukti_bayar)}" target="_blank">lihat bukti</a></span>
+  <button class="btn" onclick="ver(${x.id_pembayaran},'berhasil')">Terima</button><button class="btn ghost" onclick="ver(${x.id_pembayaran},'ditolak')">Tolak</button></div>`).join('')||'<p>Tidak ada bukti bayar yang menunggu.</p>'}
+ if(tab==='pesan'){const l=await api('/pemesanan');h+=l.map(p=>pc(p,1)).join('')||'<p>Belum ada pesanan.</p>'}
+ main(h)}};
+function pc(p,adm){const s=p.status_pemesanan,id=p.id_pemesanan;let a='';
+ if(adm){if(s==='dibayar')a=`<button class="btn" onclick="serah(${id})">Serahkan alat</button>`;if(s==='dipinjam')a=`<button class="btn" onclick="kembali(${id})">Terima pengembalian</button>`}
+ else if(s==='menunggu')a=`<input id="f${id}" type="file" accept="image/*"><button class="btn" onclick="up(${id})">Kirim bukti bayar</button><button class="btn ghost" onclick="batal(${id})">Batalkan</button>`;
+ if(['dibayar','dipinjam','selesai'].includes(s))a+=` <button class="btn ghost" onclick="inv(${id})">Invoice PDF</button>`;
+ return `<div class="card"><div class="row"><b style="flex:1">Pesanan #${id}${adm?' · '+esc(p.nama_penyewa):''}</b><span class="badge ${s}">${s}</span></div>
+ <div class="mut">${esc(p.tanggal_sewa)} sampai ${esc(p.tanggal_kembali_rencana)} · ${rp(p.total_harga)}</div><div class="bar" style="margin:.5rem 0 0">${a}</div></div>`}
+function cari(){F={q:$('#fq').value,kategori:$('#fk').value,harga_max:$('#fh').value,mulai:$('#fm').value,selesai:$('#fs').value,tersedia:$('#ft').checked?1:''};go('katalog')}
+function add(i){const n=Math.max(1,+$('#n'+i).value||1);cart[i]={nama:A[i].nama_alat,harga:A[i].harga_sewa_per_hari,n:(cart[i]?.n||0)+n};save();nav();flash('Masuk keranjang')}
+function est(){const e=$('#est'),a=$('#cm'),b=$('#cs');if(!e||!a||!b)return;const h=Math.round((new Date(b.value)-new Date(a.value))/864e5)+1;
+ e.textContent=h>=1?`Perkiraan total ${rp(Object.values(cart).reduce((t,c)=>t+c.harga*c.n,0)*h)} untuk ${h} hari`:''}
+function del(i){delete cart[i];save();go('cart')}
+async function pesan(){if(!U)return go('login');F.mulai=$('#cm').value;F.selesai=$('#cs').value;
+ const r=await api('/pemesanan',{method:'POST',json:{tanggal_sewa:F.mulai,tanggal_kembali_rencana:F.selesai,items:Object.keys(cart).map(i=>({id_alat:+i,jumlah:cart[i].n}))}});
+ cart={};save();flash('Pesanan dibuat. Total '+rp(r.total_harga));go('pesanan')}
+async function auth(){const b={email:$('#le').value,password:$('#lp').value};
+ if(reg){await api('/auth/register',{method:'POST',json:{...b,nama:$('#rn').value}});reg=0}
+ const d=await api('/auth/login',{method:'POST',json:b});T=d.token;U=d.user;localStorage.t=T;localStorage.u=JSON.stringify(U);go(U.role==='admin'?'admin':'dashboard')}
+async function up(id){const f=$('#f'+id).files[0];if(!f)return flash('Pilih foto bukti bayar dulu');const fd=new FormData();fd.append('bukti',f);fd.append('metode_pembayaran','transfer');
+ await api('/pembayaran/pemesanan/'+id,{method:'POST',body:fd});flash('Bukti terkirim, menunggu verifikasi admin');go('pesanan')}
+async function batal(id){await api('/pemesanan/'+id+'/batal',{method:'PATCH'});flash('Pesanan dibatalkan');go('pesanan')}
+async function inv(id){const b=await api('/pemesanan/'+id+'/invoice',{blob:1});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='INV-'+String(id).padStart(5,'0')+'.pdf';a.click()}
+async function tambah(){await api('/alat',{method:'POST',json:{nama_alat:$('#an').value,kategori:$('#ak').value,harga_sewa_per_hari:$('#ah').value,stok:$('#as').value}});flash('Alat ditambahkan');go('admin')}
+async function hapus(i){if(!confirm('Hapus alat ini?'))return;await api('/alat/'+i,{method:'DELETE'});go('admin')}
+async function ver(i,s){await api('/pembayaran/'+i+'/verifikasi',{method:'PATCH',json:{status:s}});go('admin')}
+async function serah(i){await api('/pengembalian/'+i+'/serahkan',{method:'PATCH'});go('admin')}
+async function kembali(i){const k=prompt('Kondisi alat: baik / rusak_ringan / rusak_berat / hilang','baik');if(!k)return;const d=prompt('Denda dalam rupiah (0 kalau tidak ada)','0');
+ await api('/pengembalian/'+i,{method:'POST',json:{kondisi_alat:k,denda:+d||0}});flash('Pengembalian dicatat');tab='pesan';go('admin')}
+async function simpanProfil(){const nama=$('#pn').value,email=$('#pe').value;await api('/auth/profil',{method:'PUT',json:{nama,email,no_hp:$('#ph').value,alamat:$('#pa').value}});U={...U,nama,email};localStorage.u=JSON.stringify(U);nav();flash('Profil disimpan')}
+async function ubahPass(){await api('/auth/password',{method:'PUT',json:{lama:$('#p1').value,baru:$('#p2').value}});$('#p1').value=$('#p2').value='';flash('Password diubah')}
+go(U?(U.role==='admin'?'admin':'dashboard'):'katalog');
+</script>
+</body>
+</html>

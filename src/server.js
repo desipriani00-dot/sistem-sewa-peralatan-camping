@@ -1,15 +1,16 @@
 require('dotenv').config();
 const app = require('./app');
-const pool = require('./config/db');
+const db = require('./config/db');
 
-const port = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3000;
 
 (async () => {
   try {
-    await pool.query('SELECT 1'); // cek koneksi database
-    app.listen(port, () => console.log(`API berjalan di http://localhost:${port}/api`));
+    await db.query('SELECT 1');
+    console.log('Koneksi MySQL berhasil');
+    app.listen(PORT, () => console.log(`Server jalan di http://localhost:${PORT}`));
   } catch (err) {
-    console.error('Gagal terhubung ke database:', err.message);
+    console.error('Gagal konek ke database:', err.message);
     process.exit(1);
   }
 })();

@@ -1,56 +1,95 @@
-const pool = require('../config/db');
-const AppError = require('../utils/AppError');
-const { ok } = require('../utils/response');
+const db = require('../config/db');
+const { success, fail } = require('../utils/response');
+const { STATUS_AKTIF } = require('../services/stok.service');
 
-exports.list = async (req, res) => {
-  const { q, kategori } = req.query;
-  const page = Math.max(parseInt(req.query.page) || 1, 1);
-  const limit = Math.min(parseInt(req.query.limit) || 12, 100);
+// Sesuai schema_sewa_camping.sql:
+// alat(id_alat, nama_alat, kategori, deskripsi, harga_sewa_per_hari, stok, gambar)
 
-  const where = [];
-  const params = [];
-  if (q) { where.push('nama_alat LIKE ?'); params.push(`%${q}%`); }
-  if (kategori) { where.push('kategori = ?'); params.push(kategori); }
-  const clause = where.length ? `WHERE ${where.join(' AND ')}` : '';
+exports.getAll = async (req, res) => {
+  try {
+    // Filter: ?kategori=Tenda &q=dome &harga_min=10000 &harga_max=80000
+    //         &mulai=2026-10-10 &selesai=2026-10-12 (hitung sisa stok di tanggal itu)
+    //         &tersedia=1 (hanya yang masih ada) &urut=harga_asc|harga_desc|nama
+    const { kategori, q, harga_min, harga_max, mulai, selesai, tersedia, urut } = req.query;
+    const params = [];
 
-  const [[{ total }]] = await pool.execute(`SELECT COUNT(*) AS total FROM alat ${clause}`, params);
-  // LIMIT/OFFSET diinline karena sudah di-sanitasi jadi integer
-  const [rows] = await pool.execute(
-    `SELECT * FROM alat ${clause} ORDER BY nama_alat LIMIT ${limit} OFFSET ${(page - 1) * limit}`,
-    params
-  );
-  ok(res, { items: rows, page, limit, total });
+    let sisa = 'a.stok';
+    if (mulai && selesai) {
+      sisa = `(a.stok - COALESCE((
+        SELECT SUM(k.jumlah) FROM keranjang_detail k
+        JOIN pemesanan p ON p.id_pemesanan = k.id_pemesanan
+        WHERE k.id_alat = a.id_alat
+          AND p.status_pemesanan IN (${STATUS_AKTIF.map(() => '?').join(',')})
+          AND p.tanggal_sewa <= ? AND p.tanggal_kembali_rencana >= ?), 0))`;
+      params.push(...STATUS_AKTIF, selesai, mulai);
+    }
+
+    let sql = `SELECT a.*, ${sisa} AS sisa_stok FROM alat a WHERE 1=1`;
+    if (kategori) { sql += ' AND a.kategori = ?'; params.push(kategori); }
+    if (q) { sql += ' AND a.nama_alat LIKE ?'; params.push(`%${q}%`); }
+    if (harga_min) { sql += ' AND a.harga_sewa_per_hari >= ?'; params.push(harga_min); }
+    if (harga_max) { sql += ' AND a.harga_sewa_per_hari <= ?'; params.push(harga_max); }
+    if (tersedia === '1') sql += ' HAVING sisa_stok > 0';
+
+    const urutan = { harga_asc: 'a.harga_sewa_per_hari ASC', harga_desc: 'a.harga_sewa_per_hari DESC', nama: 'a.nama_alat ASC' };
+    sql += ` ORDER BY ${urutan[urut] || urutan.nama}`;
+
+    const [rows] = await db.query(sql, params);
+    return success(res, rows);
+  } catch (e) { console.error(e); return fail(res, 'Server error', 500); }
 };
 
-exports.detail = async (req, res) => {
-  const [rows] = await pool.execute('SELECT * FROM alat WHERE id_alat = ?', [req.params.id]);
-  if (!rows.length) throw new AppError('Alat tidak ditemukan', 404);
-  ok(res, rows[0]);
+exports.getKategori = async (req, res) => {
+  try {
+    const [rows] = await db.query(
+      'SELECT DISTINCT kategori FROM alat WHERE kategori IS NOT NULL ORDER BY kategori');
+    return success(res, rows.map((r) => r.kategori));
+  } catch (e) { console.error(e); return fail(res, 'Server error', 500); }
+};
+
+exports.getOne = async (req, res) => {
+  try {
+    const [rows] = await db.query('SELECT * FROM alat WHERE id_alat = ?', [req.params.id]);
+    if (!rows.length) return fail(res, 'Alat tidak ditemukan', 404);
+    return success(res, rows[0]);
+  } catch (e) { console.error(e); return fail(res, 'Server error', 500); }
 };
 
 exports.create = async (req, res) => {
-  const { nama_alat, kategori, deskripsi, harga_sewa_per_hari, stok, gambar } = req.body;
-  const [r] = await pool.execute(
-    `INSERT INTO alat (nama_alat, kategori, deskripsi, harga_sewa_per_hari, stok, gambar)
-     VALUES (?, ?, ?, ?, ?, ?)`,
-    [nama_alat, kategori || null, deskripsi || null, harga_sewa_per_hari, stok ?? 0, gambar || null]
-  );
-  ok(res, { id_alat: r.insertId }, 'Alat ditambahkan', 201);
+  try {
+    const { nama_alat, kategori, deskripsi, harga_sewa_per_hari, stok, gambar } = req.body;
+    if (!nama_alat || harga_sewa_per_hari === undefined || stok === undefined) {
+      return fail(res, 'nama_alat, harga_sewa_per_hari, dan stok wajib diisi');
+    }
+    const [r] = await db.query(
+      `INSERT INTO alat (nama_alat, kategori, deskripsi, harga_sewa_per_hari, stok, gambar)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [nama_alat, kategori || null, deskripsi || null, harga_sewa_per_hari, stok, gambar || null]
+    );
+    return success(res, { id_alat: r.insertId }, 'Alat ditambahkan', 201);
+  } catch (e) { console.error(e); return fail(res, 'Server error', 500); }
 };
 
 exports.update = async (req, res) => {
-  const { nama_alat, kategori, deskripsi, harga_sewa_per_hari, stok, gambar } = req.body;
-  const [r] = await pool.execute(
-    `UPDATE alat SET nama_alat = ?, kategori = ?, deskripsi = ?,
-            harga_sewa_per_hari = ?, stok = ?, gambar = ? WHERE id_alat = ?`,
-    [nama_alat, kategori || null, deskripsi || null, harga_sewa_per_hari, stok ?? 0, gambar || null, req.params.id]
-  );
-  if (!r.affectedRows) throw new AppError('Alat tidak ditemukan', 404);
-  ok(res, null, 'Alat diperbarui');
+  try {
+    const { nama_alat, kategori, deskripsi, harga_sewa_per_hari, stok, gambar } = req.body;
+    const [r] = await db.query(
+      `UPDATE alat SET nama_alat = ?, kategori = ?, deskripsi = ?, harga_sewa_per_hari = ?, stok = ?, gambar = ?
+       WHERE id_alat = ?`,
+      [nama_alat, kategori || null, deskripsi || null, harga_sewa_per_hari, stok, gambar || null, req.params.id]
+    );
+    if (!r.affectedRows) return fail(res, 'Alat tidak ditemukan', 404);
+    return success(res, null, 'Alat diperbarui');
+  } catch (e) { console.error(e); return fail(res, 'Server error', 500); }
 };
 
 exports.remove = async (req, res) => {
-  const [r] = await pool.execute('DELETE FROM alat WHERE id_alat = ?', [req.params.id]);
-  if (!r.affectedRows) throw new AppError('Alat tidak ditemukan', 404);
-  ok(res, null, 'Alat dihapus');
+  try {
+    const [r] = await db.query('DELETE FROM alat WHERE id_alat = ?', [req.params.id]);
+    if (!r.affectedRows) return fail(res, 'Alat tidak ditemukan', 404);
+    return success(res, null, 'Alat dihapus');
+  } catch (e) {
+    if (e.code === 'ER_ROW_IS_REFERENCED_2') return fail(res, 'Alat sudah pernah dipesan, tidak bisa dihapus', 409);
+    console.error(e); return fail(res, 'Server error', 500);
+  }
 };

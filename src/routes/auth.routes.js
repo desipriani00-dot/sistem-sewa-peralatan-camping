@@ -1,20 +1,12 @@
 const router = require('express').Router();
-const { body } = require('express-validator');
-const validate = require('../middleware/validate');
-const { authenticate } = require('../middleware/auth');
-const c = require('../controllers/auth.controller');
+const auth = require('../controllers/auth.controller');
+const { verifyToken } = require('../middleware/auth');
 
-router.post('/register',
-  body('nama').trim().notEmpty().withMessage('Nama wajib diisi'),
-  body('email').isEmail().withMessage('Email tidak valid').normalizeEmail(),
-  body('password').isLength({ min: 8 }).withMessage('Password minimal 8 karakter'),
-  validate, c.register);
+router.post('/register', auth.register);
+router.post('/login', auth.login);
+router.get('/me', verifyToken, auth.me);
 
-router.post('/login',
-  body('email').isEmail().normalizeEmail(),
-  body('password').notEmpty(),
-  validate, c.login);
-
-router.get('/me', authenticate, c.me);
+router.put('/profil', verifyToken, auth.ubahProfil);
+router.put('/password', verifyToken, auth.ubahPassword);
 
 module.exports = router;
