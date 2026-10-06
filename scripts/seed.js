@@ -1,26 +1,47 @@
-// Mengisi akun admin dan beberapa alat contoh. Aman dijalankan berulang.
-require('dotenv').config();
-const bcrypt = require('bcryptjs');
-const db = require('../src/config/db');
+const mysql = require('mysql2');
 
-(async () => {
-  const [r] = await db.query("SELECT id_role FROM roles WHERE nama_role = 'admin'");
-  if (!r.length) throw new Error('Role admin belum ada. Import schema_sewa_camping.sql dulu.');
-  const email = 'admin@camping.local';
-  const [u] = await db.query('SELECT id_user FROM users WHERE email = ?', [email]);
-  if (!u.length) {
-    await db.query('INSERT INTO users (id_role, nama, email, password) VALUES (?, ?, ?, ?)',
-      [r[0].id_role, 'Admin', email, await bcrypt.hash('admin123', 10)]);
+const db = mysql.createConnection({
+  host: 'localhost',
+  user: 'root',
+  password: '',
+  database: 'sewa_camping'
+});
+
+db.connect((err) => {
+  if (err) {
+    console.error('Koneksi database gagal:', err.message);
+    return;
   }
-  const [c] = await db.query('SELECT COUNT(*) AS n FROM alat');
-  if (!c[0].n) {
-    await db.query('INSERT INTO alat (nama_alat, kategori, deskripsi, harga_sewa_per_hari, stok) VALUES ?', [[
-      ['Tenda Dome 4 Orang', 'Tenda', 'Anti air, mudah dipasang', 50000, 3],
-      ['Sleeping Bag', 'Tidur', 'Hangat sampai 10 derajat', 15000, 10],
-      ['Kompor Portable', 'Masak', 'Pakai gas kaleng', 20000, 5],
-      ['Carrier 60L', 'Tas', 'Punggung berventilasi', 30000, 4],
-    ]]);
-  }
-  console.log('Selesai. Login admin: admin@camping.local / admin123');
-  process.exit(0);
-})().catch((e) => { console.error(e.message); process.exit(1); });
+  console.log('Berhasil terhubung ke database sewa_camping!');
+
+  // 1. Buat Tabel Peralatan
+  const sqlTabelPeralatan = `
+    CREATE TABLE IF NOT EXISTS peralatan (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      nama_barang VARCHAR(100) NOT NULL,
+      harga_sewa INT NOT NULL,
+      stok INT NOT NULL
+    )
+  `;
+
+  db.query(sqlTabelPeralatan, (err) => {
+    if (err) throw err;
+    console.log('Tabel peralatan siap!');
+
+    // 2. Isi Data Awal Peralatan
+    const sqlIsiData = `
+      INSERT INTO peralatan (nama_barang, harga_sewa, stok) VALUES
+      ('Tenda Kapasitas 4 Orang', 50000, 10),
+      ('Sleeping Bag', 15000, 20),
+      ('Kompor Portable', 20000, 15),
+      ('Carrier 60 Liter', 35000, 8)
+      ON DUPLICATE KEY UPDATE nama_barang=VALUES(nama_barang);
+    `;
+
+    db.query(sqlIsiData, (err) => {
+      if (err) throw err;
+      console.log('Data awal peralatan berhasil dimasukkan!');
+      db.end();
+    });
+  });
+});

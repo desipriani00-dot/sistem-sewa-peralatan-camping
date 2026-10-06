@@ -124,7 +124,7 @@ async function pesan(){if(!U)return go('login');F.mulai=$('#cm').value;F.selesai
 async function auth(){const b={email:$('#le').value,password:$('#lp').value};
  if(reg){await api('/auth/register',{method:'POST',json:{...b,nama:$('#rn').value}});reg=0}
  const d=await api('/auth/login',{method:'POST',json:b});T=d.token;U=d.user;localStorage.t=T;localStorage.u=JSON.stringify(U);go(U.role==='admin'?'admin':'dashboard')}
-async function up(id){const f=$('#f'+id).files[0];if(!f)return flash('Pilih foto bukti bayar dulu');const fd=new FormData();fd.append('bukti',f);fd.append('metode_pembayaran','transfer');
+async function up(id){const f=$('#f'+id).files[0];if(!f)return flash('Pilih foto bukti bayar dulu');if(!['image/jpeg','image/png','image/webp'].includes(f.type))return flash('File harus berupa gambar JPG, PNG, atau WEBP');if(f.size>2*1024*1024)return flash('Ukuran file maksimal 2 MB');const fd=new FormData();fd.append('bukti',f);fd.append('metode_pembayaran','transfer');
  await api('/pembayaran/pemesanan/'+id,{method:'POST',body:fd});flash('Bukti terkirim, menunggu verifikasi admin');go('pesanan')}
 async function batal(id){await api('/pemesanan/'+id+'/batal',{method:'PATCH'});flash('Pesanan dibatalkan');go('pesanan')}
 async function inv(id){const b=await api('/pemesanan/'+id+'/invoice',{blob:1});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='INV-'+String(id).padStart(5,'0')+'.pdf';a.click()}
