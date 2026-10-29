@@ -1444,6 +1444,36 @@ document.getElementById('passwordForm').addEventListener('submit', changePasswor
 document.getElementById('startDate').addEventListener('change', updateCheckoutSummary);
 document.getElementById('endDate').addEventListener('change', updateCheckoutSummary);
 
+document.getElementById('registerForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const nama = document.getElementById('regNama').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  const password = document.getElementById('regPassword').value;
+  const konfirmasi = document.getElementById('regKonfirmasi').value;
+
+  if (password !== konfirmasi) {
+    alert('Konfirmasi password tidak sama');
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nama, email, password }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      alert('Daftar gagal: ' + data.message);
+      return;
+    }
+    alert('Pendaftaran berhasil, silakan login');
+    window.location.href = '/';
+  } catch (err) {
+    alert('Terjadi kesalahan, silakan coba kembali');
+  }
+});
+
 init();
 
 </script>
