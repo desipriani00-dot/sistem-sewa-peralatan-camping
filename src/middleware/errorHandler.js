@@ -3,7 +3,7 @@ const isProd = process.env.NODE_ENV === 'production';
 function notFound(req, res) {
   res.status(404).json({
     success: false,
-    message: `Rute ${req.method} ${req.originalUrl} tidak ditemukan`,
+    message: 'Data tidak ditemukan',
   });
 }
 
@@ -14,7 +14,7 @@ function errorHandler(err, req, res, next) {
 
   if (err.type === 'entity.parse.failed') {
     status = 400;
-    message = 'Format JSON tidak valid';
+    message = 'Format data tidak valid';
   } else if (err.name === 'TokenExpiredError') {
     status = 401;
     message = 'Sesi login sudah habis, silakan login lagi';
@@ -25,27 +25,27 @@ function errorHandler(err, req, res, next) {
     status = 400;
     message = err.code === 'LIMIT_FILE_SIZE'
       ? 'Ukuran file maksimal 2MB'
-      : `Gagal upload file: ${err.message}`;
+      : 'Gagal upload file';
   } else if (err.code === 'ER_DUP_ENTRY') {
     status = 409;
-    message = 'Data sudah ada (duplikat)';
+    message = 'Data sudah terdaftar';
   } else if (err.code === 'ER_ROW_IS_REFERENCED_2') {
     status = 409;
-    message = 'Data masih dipakai di tabel lain, tidak bisa dihapus';
+    message = 'Data masih dipakai, tidak bisa dihapus';
   } else if (err.code === 'ER_NO_REFERENCED_ROW_2') {
     status = 400;
-    message = 'Data referensi tidak ditemukan';
+    message = 'Data terkait tidak ditemukan';
   } else if (err.code === 'ER_BAD_NULL_ERROR') {
     status = 400;
-    message = 'Ada field wajib yang belum diisi';
+    message = 'Mohon lengkapi data terlebih dahulu';
   } else if (err.code === 'ECONNREFUSED' || err.code === 'PROTOCOL_CONNECTION_LOST') {
     status = 503;
-    message = 'Database sedang bermasalah, coba lagi nanti';
+    message = 'Terjadi kesalahan, silakan coba kembali';
   }
 
   if (status >= 500) {
     console.error(`[ERROR] ${req.method} ${req.originalUrl}`, err);
-    if (isProd) message = 'Terjadi kesalahan pada server';
+    if (isProd || err.code) message = 'Terjadi kesalahan, silakan coba kembali';
   }
 
   if (res.headersSent) return next(err);

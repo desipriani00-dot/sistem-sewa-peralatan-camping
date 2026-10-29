@@ -7,6 +7,7 @@ const STATUS_AKTIF = ['menunggu', 'dibayar', 'dipinjam'];
 
 exports.STATUS_AKTIF = STATUS_AKTIF;
 
+
 exports.sisaStok = async (conn, idAlat, mulai, selesai) => {
   // FOR UPDATE = kunci baris alat ini, pesanan lain harus menunggu sampai transaksi selesai
   const [[alat]] = await conn.query('SELECT id_alat, stok FROM alat WHERE id_alat = ? FOR UPDATE', [idAlat]);

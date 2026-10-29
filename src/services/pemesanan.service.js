@@ -31,10 +31,10 @@ exports.buat = async (idUser, { tanggal_sewa, tanggal_kembali_rencana, items }) 
         'SELECT nama_alat, harga_sewa_per_hari, stok FROM alat WHERE id_alat = ? FOR UPDATE',
         [id_alat]
       );
-      if (!rows.length) throw new AppError(`Alat ${id_alat} tidak ditemukan`, 404);
+      if (!rows.length) throw new AppError('Data alat tidak ditemukan', 404);
       const alat = rows[0];
       if (alat.stok < jumlah) {
-        throw new AppError(`Stok "${alat.nama_alat}" tidak cukup (tersisa ${alat.stok})`, 409);
+        throw new AppError('Alat sedang tidak tersedia', 409);
       }
 
       const subtotal = Number(alat.harga_sewa_per_hari) * jumlah * durasi;
@@ -82,7 +82,7 @@ exports.ubahStatus = async (idPemesanan, status) => {
       'SELECT status_pemesanan FROM pemesanan WHERE id_pemesanan = ? FOR UPDATE',
       [idPemesanan]
     );
-    if (!rows.length) throw new AppError('Pemesanan tidak ditemukan', 404);
+    if (!rows.length) throw new AppError('Data pemesanan tidak ditemukan', 404);
     const sekarang = rows[0].status_pemesanan;
 
     if (['selesai', 'dibatalkan'].includes(sekarang)) {

@@ -75,9 +75,24 @@ exports.buat = async (req, res) => {
 exports.saya = async (req, res) => {
   try {
     const [rows] = await db.query(
-      'SELECT * FROM pemesanan WHERE id_user = ? ORDER BY id_pemesanan DESC', [req.user.id]);
+      `SELECT p.*,
+              e.id_evaluasi,
+              e.rating,
+              e.ulasan,
+              e.tanggal_ulasan
+       FROM pemesanan p
+       LEFT JOIN evaluasi e
+         ON e.id_pemesanan = p.id_pemesanan
+       WHERE p.id_user = ?
+       ORDER BY p.id_pemesanan DESC`,
+      [req.user.id]
+    );
+
     return success(res, rows);
-  } catch (e) { console.error(e); return fail(res, 'Server error', 500); }
+  } catch (e) {
+    console.error(e);
+    return fail(res, 'Server error', 500);
+  }
 };
 
 exports.semua = async (req, res) => {
@@ -119,4 +134,58 @@ exports.batalkan = async (req, res) => {
     await db.query("UPDATE pemesanan SET status_pemesanan = 'dibatalkan' WHERE id_pemesanan = ?", [p.id_pemesanan]);
     return success(res, null, 'Pesanan dibatalkan');
   } catch (e) { console.error(e); return fail(res, 'Server error', 500); }
+};
+
+/* =========================
+   ACC / TOLAK PESANAN ADMIN
+========================= */
+exports.ubahStatus = async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const { status } = req.body;
+
+    if (!Number.isInteger(id) || id < 1) {
+      return fail(res, 'ID pesanan tidak valid', 400);
+    }
+
+    if (!['disetujui', 'ditolak'].includes(status)) {
+      return fail(res, 'Status harus disetujui atau ditolak', 400);
+    }
+
+    const [[pesanan]] = await db.query(
+      'SELECT id_pemesanan, status_pemesanan FROM pemesanan WHERE id_pemesanan = ?',
+      [id]
+    );
+
+    if (!pesanan) {
+      return fail(res, `Pesanan dengan ID ${id} tidak ditemukan`, 404);
+    }
+
+    if (pesanan.status_pemesanan !== 'menunggu') {
+      return fail(
+        res,
+        `Pesanan tidak bisa diubah karena statusnya ${pesanan.status_pemesanan}`,
+        400
+      );
+    }
+
+    await db.query(
+      'UPDATE pemesanan SET status_pemesanan = ? WHERE id_pemesanan = ?',
+      [status === 'disetujui' ? 'dibayar' : 'dibatalkan', id]
+    );
+
+    return success(
+      res,
+      {
+        id_pemesanan: id,
+        status_pemesanan: status === 'disetujui' ? 'dibayar' : 'dibatalkan'
+      },
+      status === 'disetujui'
+        ? 'Pesanan berhasil disetujui'
+        : 'Pesanan berhasil ditolak'
+    );
+  } catch (e) {
+    console.error('Gagal mengubah status pesanan:', e);
+    return fail(res, 'Server error', 500);
+  }
 };
