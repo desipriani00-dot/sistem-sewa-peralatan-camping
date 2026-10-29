@@ -263,6 +263,93 @@ h1{font-size:23px}
 .product-grid{grid-template-columns:1fr}
 .product-img{height:180px}
 }
+
+/* PERKECIL SIDEBAR PELANGGAN */
+@media (max-width: 760px) {
+  .sidebar {
+    width: 240px;
+    left: -250px;
+    padding: 12px 10px;
+  }
+
+  .sidebar.open {
+    left: 0;
+  }
+
+  .logo-box {
+    padding: 16px 10px;
+    margin-bottom: 12px;
+    border-radius: 16px;
+  }
+
+  .logo-circle {
+    width: 62px;
+    height: 62px;
+    margin-bottom: 8px;
+  }
+
+  .logo-circle i {
+    font-size: 27px;
+  }
+
+  .logo-title {
+    font-size: 19px;
+  }
+
+  .logo-sub {
+    font-size: 10px;
+  }
+
+  .menu-title {
+    font-size: 11px;
+    margin: 5px 10px 8px;
+  }
+
+  .menu {
+    gap: 4px;
+    padding-bottom: 6px;
+  }
+
+  .menu a {
+    min-height: 46px;
+    padding: 9px 12px;
+    gap: 10px;
+    border-radius: 10px;
+    font-size: 13px;
+  }
+
+  .menu a i {
+    width: 20px;
+    font-size: 16px;
+  }
+
+  .menu a .count {
+    min-width: 27px;
+    height: 27px;
+    font-size: 11px;
+  }
+
+  .menu-section {
+    font-size: 11px;
+    padding: 10px 10px 5px;
+  }
+
+  .menu-divider {
+    margin: 5px;
+  }
+
+  .logout {
+    padding-top: 8px;
+  }
+
+  .logout a {
+    min-height: 46px;
+    border-radius: 10px;
+    gap: 8px;
+    font-size: 14px;
+  }
+}
+
 </style>
 </head>
 
@@ -650,6 +737,7 @@ let token=localStorage.getItem('token')||'';
 let products=[];
 let cart=JSON.parse(localStorage.getItem('sisepcampCart')||'[]');
 let orders=[];
+let evaluations=[];
 let selectedCategory='Semua';
 let usingDemoProducts=false;
 
@@ -678,9 +766,47 @@ function getName(p){
 function getId(p){
  return p.id_alat??p.id??p.id_peralatan;
 }
-function getPrice(p){
- return Number(p.harga_sewa??p.harga??p.harga_per_hari??p.price??0);
+
+function getPrice(p) {
+  const fields = [
+    "harga_sewa",
+    "harga_sewa_per_hari",
+    "harga_per_hari",
+    "harga_sewa_harian",
+    "tarif_sewa",
+    "biaya_sewa",
+    "harga",
+    "price",
+    "price_per_day",
+    "daily_price"
+  ];
+
+  // Ambil harga dari database
+  for (const field of fields) {
+    const value = p?.[field];
+
+    if (value !== null && value !== undefined && value !== "") {
+      const number = Number(
+        String(value).replace(/[^\d.-]/g, "")
+      );
+
+      if (Number.isFinite(number) && number > 0) {
+        return number;
+      }
+    }
+  }
+
+  // Jika harga database kosong, cari harga katalog demo
+  const demo = findDemo(p);
+
+  if (demo && Number(demo.harga_sewa) > 0) {
+    return Number(demo.harga_sewa);
+  }
+
+  // Harga contoh jika barang tidak cocok dengan katalog demo
+  return 10000;
 }
+
 function getStock(p){
  return Number(p.stok??p.jumlah_stok??p.stock??0);
 }
@@ -794,9 +920,16 @@ function setCategory(category){
  selectedCategory=category;
  renderProducts();
 }
-function renderPopular(){
- document.getElementById('popularProducts').innerHTML=products.slice(0,3).map(productCard).join('');
+
+function renderPopular() {
+  const box = document.getElementById("popularProducts");
+  if (!box) return;
+
+  box.innerHTML = products.length
+    ? products.map(productCard).join("")
+    : `<div class="empty">Katalog peralatan belum tersedia.</div>`;
 }
+
 async function loadProducts(){
  try{
   const result=unwrap(await apiFetch('/alat'));
@@ -904,34 +1037,64 @@ function updateCheckoutSummary(){
  document.getElementById('checkoutSummary').innerHTML=
  `Lama sewa: <strong>${days} hari</strong><br>Total perkiraan: <strong>${rupiah(total)}</strong>`;
 }
-async function submitCheckout(event){
- event.preventDefault();
- if(!token)return alert('Silakan login terlebih dahulu.');
- const start=document.getElementById('startDate').value;
- const end=document.getElementById('endDate').value;
- if(!start||!end||end<=start)return alert('Tanggal pengembalian harus setelah tanggal mulai sewa.');
- const items=cartDetails();
- if(!items.length)return alert('Keranjang masih kosong.');
 
- const days=Math.ceil((new Date(end+'T00:00:00')-new Date(start+'T00:00:00'))/86400000);
- const total=items.reduce((sum,x)=>sum+x.total,0)*days;
- const payload={
-  tanggal_sewa:start,
-  tanggal_kembali:end,
-  detail:items.map(({p,qty})=>({id_alat:getId(p),jumlah:qty})),
-  total_harga:total
- };
- try{
-  await apiFetch('/pemesanan',{method:'POST',body:JSON.stringify(payload)});
-  alert('Pesanan berhasil dikirim. Periksa menu Pesanan Saya.');
-  cart=[];
-  setCart();
-  showPage('pesanan');
- }catch(error){
-  alert('Pesanan belum berhasil dibuat: '+error.message+
-  '\nPeriksa format data yang diminta endpoint /api/pemesanan di backend kamu.');
- }
+async function submitCheckout(event) {
+  event.preventDefault();
+
+  if (!token) {
+    alert("Silakan login terlebih dahulu.");
+    return;
+  }
+
+  const tanggal_sewa = document.getElementById("startDate").value;
+  const tanggal_kembali_rencana = document.getElementById("endDate").value;
+
+  if (!tanggal_sewa || !tanggal_kembali_rencana ||
+      tanggal_kembali_rencana <= tanggal_sewa) {
+    alert("Tanggal pengembalian harus setelah tanggal mulai sewa.");
+    return;
+  }
+
+  const items = cartDetails();
+
+  if (!items.length) {
+    alert("Keranjang masih kosong.");
+    return;
+  }
+
+  const days = Math.ceil(
+    (new Date(tanggal_kembali_rencana + "T00:00:00") -
+     new Date(tanggal_sewa + "T00:00:00")) / 86400000
+  );
+
+  const total = items.reduce((sum, item) => sum + item.total, 0) * days;
+
+  const payload = {
+    tanggal_sewa,
+    tanggal_kembali_rencana,
+    items: items.map(({ p, qty }) => ({
+      id_alat: getId(p),
+      jumlah: qty
+    })),
+    total_harga: total
+  };
+
+  try {
+    await apiFetch("/pemesanan", {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
+
+    alert("Pesanan berhasil dibuat!");
+    cart = [];
+    setCart();
+    await loadOrders();
+    showPage("pesanan");
+  } catch (error) {
+    alert("Pesanan gagal: " + error.message);
+  }
 }
+
 function statusBadge(status){
  const s=String(status||'Menunggu Konfirmasi').toLowerCase();
  if(s.includes('selesai')||s.includes('kembali'))return '<span class="badge bg-selesai">'+esc(status)+'</span>';
@@ -954,26 +1117,146 @@ function renderOrderTable(list,containerId){
  </tr>`).join('')}
  </tbody></table>`;
 }
-async function loadOrders(){
- if(!token){
-  document.getElementById('ordersContent').innerHTML='<div class="empty">Login untuk melihat pesanan.</div>';
-  return;
- }
- try{
-  const result=unwrap(await apiFetch('/pemesanan'));
-  orders=Array.isArray(result)?result:(result.pemesanan||result.pesanan||result.orders||[]);
-  renderOrderTable(orders,'ordersContent');
-  renderHistory();
- }catch(error){
-  document.getElementById('ordersContent').innerHTML=`<div class="empty">${esc(error.message)}</div>`;
- }
+async function loadMyEvaluations(){
+  try{
+    const result = unwrap(await apiFetch('/evaluasi/saya'));
+    evaluations = Array.isArray(result) ? result : [];
+  }catch(error){
+    evaluations = [];
+    console.error('Gagal memuat evaluasi:', error);
+  }
 }
+
+async function submitEvaluation(id){
+  const nilai = prompt('Beri rating 1 sampai 5:');
+  if(nilai === null) return;
+
+  const rating = Number(nilai);
+  if(!Number.isInteger(rating) || rating < 1 || rating > 5){
+    alert('Rating harus berupa angka 1 sampai 5.');
+    return;
+  }
+
+  const ulasan = prompt('Tulis ulasan (boleh dikosongkan):') || '';
+
+  try{
+    await apiFetch('/evaluasi',{
+      method:'POST',
+      body:JSON.stringify({
+        id_pemesanan:id,
+        rating,
+        ulasan
+      })
+    });
+
+    alert('Rating berhasil dikirim!');
+    await loadMyEvaluations();
+    renderHistory();
+  }catch(error){
+    alert('Rating gagal dikirim: '+error.message);
+  }
+}
+async function loadOrders() {
+    const container = document.getElementById('ordersContent');
+
+    if (!token) {
+        container.innerHTML =
+            '<div class="empty">Silakan login untuk melihat pesanan.</div>';
+        return;
+    }
+
+    container.innerHTML =
+        '<div class="empty">Memuat pesanan...</div>';
+
+    try {
+        // Endpoint khusus pesanan milik pelanggan yang sedang login
+        const result = await apiFetch('/pemesanan/saya');
+
+        const data = unwrap(result);
+
+        orders = Array.isArray(data)
+            ? data
+            : (
+                data.pemesanan ||
+                data.pesanan ||
+                data.orders ||
+                data.data ||
+                []
+            );
+
+        renderOrderTable(orders, 'ordersContent');
+await loadMyEvaluations();
+renderHistory();
+
+    } catch (error) {
+        container.innerHTML = `
+            <div class="empty">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                <p>Gagal memuat pesanan: ${esc(error.message)}</p>
+                <button class="btn btn-green"
+                    onclick="loadOrders()"
+                    style="margin-top:12px">
+                    Coba Lagi
+                </button>
+            </div>`;
+    }
+}
+
 function renderHistory(){
- const completed=orders.filter(o=>{
-  const s=String(o.status_pemesanan||o.status||'').toLowerCase();
-  return s.includes('selesai')||s.includes('kembali');
- });
- renderOrderTable(completed,'historyContent');
+  const completed = orders.filter(o => {
+    const s = String(o.status_pemesanan || o.status || '').toLowerCase();
+    return s === 'selesai' || s === 'kembali';
+  });
+
+  const container = document.getElementById('historyContent');
+
+  if(!completed.length){
+    container.innerHTML =
+      '<div class="empty"><i class="fa-solid fa-clock"></i>' +
+      '<p>Belum ada penyewaan yang selesai.</p></div>';
+    return;
+  }
+
+  container.innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Nomor Pesanan</th>
+          <th>Tanggal</th>
+          <th>Total</th>
+          <th>Status</th>
+          <th>Evaluasi</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${completed.map((o,i) => {
+          const id = o.id_pemesanan ?? o.id;
+          const evaluasi = evaluations.find(
+            e => Number(e.id_pemesanan) === Number(id)
+          );
+
+          return `<tr>
+            <td>${i+1}</td>
+            <td>${esc(o.kode_pemesanan || id || '-')}</td>
+            <td>${esc(o.tanggal_sewa || o.created_at || '-')}</td>
+            <td>${rupiah(o.total_harga || o.total || 0)}</td>
+            <td>${statusBadge(o.status_pemesanan || o.status)}</td>
+            <td>
+              ${evaluasi
+                ? `<span style="color:#287C35;font-weight:700">
+                     ★ ${esc(evaluasi.rating)}/5
+                   </span>`
+                : `<button class="btn btn-green"
+                     onclick="submitEvaluation(${Number(id)})">
+                     Beri Rating
+                   </button>`
+              }
+            </td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>`;
 }
 function renderProfile(){
  const u=currentUser||{};
