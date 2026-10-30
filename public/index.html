@@ -350,6 +350,39 @@ h1{font-size:23px}
   }
 }
 
+
+/* INPUT UNGGAH DOKUMEN */
+.form-group input[type="file"]{padding:10px;background:#F8FBF8}
+
+/* TOMBOL LIHAT / SEMBUNYIKAN PASSWORD */
+.password-wrapper{
+  position:relative;
+  width:100%;
+}
+.password-wrapper input{
+  width:100%;
+  padding-right:44px !important;
+}
+.password-toggle{
+  position:absolute;
+  top:50%;
+  right:12px;
+  transform:translateY(-50%);
+  border:0;
+  background:transparent;
+  color:var(--muted);
+  cursor:pointer;
+  padding:6px;
+  line-height:1;
+  font-size:14px;
+}
+.password-toggle:hover{color:var(--text-green)}
+.password-toggle:focus-visible{
+  outline:2px solid var(--green);
+  outline-offset:2px;
+  border-radius:4px;
+}
+
 </style>
 </head>
 
@@ -469,8 +502,28 @@ h1{font-size:23px}
             <input id="regNama" required placeholder="Nama lengkap">
           </div>
           <div class="form-group">
+            <label>Username</label>
+            <input id="regUsername" required placeholder="Masukkan Username">
+          </div>
+          <div class="form-group">
             <label>Email</label>
-            <input id="regEmail" type="email" required placeholder="Email aktif">
+            <input id="regEmail" type="email" required placeholder="Masukkan Email">
+          </div>
+          <div class="form-group">
+            <label>No. Handphone</label>
+            <input id="regTelepon" type="tel" required placeholder="08xxxxxxxxxx">
+          </div>
+          <div class="form-group">
+            <label>Alamat Lengkap</label>
+            <textarea id="regAlamat" rows="2" required placeholder="Masukkan alamat lengkap"></textarea>
+          </div>
+          <div class="form-group">
+            <label>Nomor KTP</label>
+            <input id="regKtp" inputmode="numeric" pattern="[0-9]{16}" maxlength="16" minlength="16" required placeholder="Masukkan Nomor KTP">
+          </div>
+          <div class="form-group">
+            <label>Upload Foto KTP (Jaminan)</label>
+            <input id="regFotoKtp" type="file" accept="image/*" required>
           </div>
           <div class="form-group">
             <label>Password</label>
@@ -652,7 +705,13 @@ h1{font-size:23px}
           <div><div class="profile-label">Nama Lengkap</div><div class="profile-value" id="detailNama">-</div></div>
           <div><div class="profile-label">Email</div><div class="profile-value" id="detailEmail">-</div></div>
           <div><div class="profile-label">Nomor Telepon</div><div class="profile-value" id="detailTelepon">-</div></div>
+          <div><div class="profile-label">Username</div><div class="profile-value" id="detailUsername">-</div></div>
           <div><div class="profile-label">Alamat</div><div class="profile-value" id="detailAlamat">-</div></div>
+          <div><div class="profile-label">Nomor KTP</div><div class="profile-value" id="detailKtp">-</div></div>
+          <div style="grid-column:1/-1">
+            <div class="profile-label">Foto KTP</div>
+            <div class="profile-value" id="detailFotoKtp">Belum ada foto KTP.</div>
+          </div>
         </div>
         <button class="btn btn-green" style="margin-top:25px" onclick="showPage('edit-profil')">
           <i class="fa-solid fa-pen"></i> Edit Profil
@@ -673,9 +732,17 @@ h1{font-size:23px}
       <div class="panel-body">
         <form id="profileForm">
           <div class="form-group"><label>Nama Lengkap</label><input id="editNama" required></div>
+          <div class="form-group"><label>Username</label><input id="editUsername" required></div>
           <div class="form-group"><label>Email</label><input id="editEmail" type="email" required></div>
-          <div class="form-group"><label>Nomor Telepon</label><input id="editTelepon" type="tel"></div>
-          <div class="form-group"><label>Alamat Lengkap</label><textarea id="editAlamat" rows="3"></textarea></div>
+          <div class="form-group"><label>Nomor Telepon</label><input id="editTelepon" type="tel" required></div>
+          <div class="form-group"><label>Alamat Lengkap</label><textarea id="editAlamat" rows="3" required></textarea></div>
+          <div class="form-group"><label>Nomor KTP</label><input id="editKtp" inputmode="numeric" minlength="16" maxlength="16" required></div>
+          <div class="form-group">
+            <label>Foto KTP (Jaminan)</label>
+            <div id="editFotoKtpSaatIni" class="desc" style="margin-bottom:8px">Belum ada foto KTP.</div>
+            <input id="editFotoKtp" type="file" accept="image/*">
+            <small class="desc">Kosongkan jika tidak ingin mengganti foto KTP.</small>
+          </div>
           <button type="submit" class="btn btn-green"><i class="fa-solid fa-floppy-disk"></i> Simpan Perubahan</button>
           <button type="button" class="btn btn-outline" onclick="showPage('profil')">Batal</button>
         </form>
@@ -767,6 +834,11 @@ function getId(p){
  return p.id_alat??p.id??p.id_peralatan;
 }
 
+function findDemo(p){
+ const id=getId(p);
+ return demoProducts.find(x=>String(getId(x))===String(id)||getName(x)===getName(p));
+}
+
 function getPrice(p) {
   const fields = [
     "harga_sewa",
@@ -821,7 +893,7 @@ function authHeaders(){
 }
 async function apiFetch(path,options={}){
  const headers={...authHeaders(),...(options.headers||{})};
- if(options.body&&!headers['Content-Type'])headers['Content-Type']='application/json';
+ if(options.body && !(options.body instanceof FormData) && !headers['Content-Type']) headers['Content-Type']='application/json';
  const response=await fetch(API+path,{...options,headers});
  const result=await response.json().catch(()=>({message:'Respons server tidak valid.'}));
  if(!response.ok)throw new Error(result.message||result.pesan||'Permintaan gagal.');
@@ -1101,21 +1173,96 @@ function statusBadge(status){
  if(s.includes('sewa')||s.includes('disetujui')||s.includes('proses'))return '<span class="badge bg-disewa">'+esc(status)+'</span>';
  return '<span class="badge bg-proses">'+esc(status||'Menunggu Konfirmasi')+'</span>';
 }
-function renderOrderTable(list,containerId){
- const container=document.getElementById(containerId);
- if(!list.length){
-  container.innerHTML='<div class="empty"><i class="fa-solid fa-box-open"></i><p>Belum ada data pesanan.</p></div>';
-  return;
- }
- container.innerHTML=`<table><thead><tr><th>No</th><th>Nomor Pesanan</th><th>Tanggal</th><th>Total</th><th>Status</th></tr></thead><tbody>
- ${list.map((o,i)=>`<tr>
- <td>${i+1}</td>
- <td>${esc(o.kode_pemesanan||o.id_pemesanan||o.id||'-')}</td>
- <td>${esc(o.tanggal_sewa||o.created_at||o.tanggal_pemesanan||'-')}</td>
- <td>${rupiah(o.total_harga||o.total||0)}</td>
- <td>${statusBadge(o.status_pemesanan||o.status||o.status_pembayaran)}</td>
- </tr>`).join('')}
- </tbody></table>`;
+function renderOrderTable(list, containerId) {
+  const container = document.getElementById(containerId);
+
+  if (!list.length) {
+    container.innerHTML = `
+      <div class="empty">
+        <i class="fa-solid fa-box-open"></i>
+        <p>Belum ada data pesanan.</p>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Nomor Pesanan</th>
+          <th>Tanggal</th>
+          <th>Total</th>
+          <th>Status</th>
+          <th>Pembayaran</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${list.map((o, i) => {
+          const id = Number(o.id_pemesanan ?? o.id);
+          const status = String(o.status_pemesanan || o.status || '').toLowerCase();
+
+          return `
+            <tr>
+              <td>${i + 1}</td>
+              <td>${esc(o.kode_pemesanan || id || '-')}</td>
+              <td>${esc(o.tanggal_sewa || o.created_at || o.tanggal_pemesanan || '-')}</td>
+              <td>${rupiah(o.total_harga || o.total || 0)}</td>
+              <td>${statusBadge(status)}</td>
+              <td>
+                ${status === 'menunggu' && id
+                  ? `<button class="btn btn-green"
+                       onclick="uploadPayment(${id})">
+                       <i class="fa-solid fa-upload"></i> Upload Bukti
+                     </button>`
+                  : '-'}
+              </td>
+            </tr>`;
+        }).join('')}
+      </tbody>
+    </table>`;
+}
+async function uploadPayment(id) {
+  if (!token) {
+    alert('Silakan login terlebih dahulu.');
+    return;
+  }
+
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/jpeg,image/png,image/webp';
+
+  input.onchange = async () => {
+    const file = input.files[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      alert('Ukuran foto maksimal 2 MB.');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('bukti', file);
+    formData.append('metode_pembayaran', 'transfer');
+
+    try {
+      const result = await apiFetch(
+        `/pembayaran/pemesanan/${id}`,
+        {
+          method: 'POST',
+          body: formData
+        }
+      );
+
+      alert(result.message || 'Bukti pembayaran berhasil dikirim.');
+
+      await loadOrders();
+    } catch (error) {
+      alert('Upload bukti pembayaran gagal: ' + error.message);
+    }
+  };
+
+  input.click();
 }
 async function loadMyEvaluations(){
   try{
@@ -1258,6 +1405,14 @@ function renderHistory(){
       </tbody>
     </table>`;
 }
+function getKtpImageUrl(u){
+ return u.foto_ktp_url||u.foto_ktp||u.ktp_image_url||u.foto_ktp_path||'';
+}
+function hasCompleteKtp(u){
+ const nomor=String(u?.nomor_ktp||u?.no_ktp||u?.nik||'').replace(/\D/g,'');
+ const foto=getKtpImageUrl(u);
+ return /^\d{16}$/.test(nomor) && !!foto;
+}
 function renderProfile(){
  const u=currentUser||{};
  const name=u.nama||u.nama_lengkap||u.username||'Pelanggan';
@@ -1267,26 +1422,45 @@ function renderProfile(){
  document.getElementById('detailNama').textContent=name;
  document.getElementById('detailEmail').textContent=u.email||'-';
  document.getElementById('detailTelepon').textContent=u.no_hp||u.telepon||u.nomor_telepon||'-';
+ document.getElementById('detailUsername').textContent=u.username||'-';
  document.getElementById('detailAlamat').textContent=u.alamat||'-';
+ document.getElementById('detailKtp').textContent=u.nomor_ktp||u.no_ktp||u.nik||'-';
+ const image=getKtpImageUrl(u);
+ document.getElementById('detailFotoKtp').innerHTML=image
+   ? `<a href="${esc(image)}" target="_blank" rel="noopener">Lihat foto KTP</a><br><img src="${esc(image)}" alt="Foto KTP" style="display:block;max-width:280px;width:100%;max-height:220px;object-fit:contain;border:1px solid var(--border);border-radius:10px;margin-top:10px">`
+   : 'Belum ada foto KTP.';
 }
 function fillProfileForm(){
  const u=currentUser||{};
  document.getElementById('editNama').value=u.nama||u.nama_lengkap||'';
+ document.getElementById('editUsername').value=u.username||'';
  document.getElementById('editEmail').value=u.email||'';
  document.getElementById('editTelepon').value=u.no_hp||u.telepon||u.nomor_telepon||'';
  document.getElementById('editAlamat').value=u.alamat||'';
+ document.getElementById('editKtp').value=u.nomor_ktp||u.no_ktp||u.nik||'';
+ const image=getKtpImageUrl(u);
+ document.getElementById('editFotoKtpSaatIni').innerHTML=image
+   ? `<a href="${esc(image)}" target="_blank" rel="noopener">Lihat foto KTP saat ini</a><br><img src="${esc(image)}" alt="Foto KTP saat ini" style="display:block;max-width:240px;width:100%;max-height:180px;object-fit:contain;border:1px solid var(--border);border-radius:10px;margin-top:8px">`
+   : 'Belum ada foto KTP.';
+ document.getElementById('editFotoKtp').value='';
 }
 async function saveProfile(event){
  event.preventDefault();
- const payload={
-  nama:document.getElementById('editNama').value.trim(),
-  email:document.getElementById('editEmail').value.trim(),
-  no_hp:document.getElementById('editTelepon').value.trim(),
-  alamat:document.getElementById('editAlamat').value.trim()
- };
+ const formData=new FormData();
+ formData.append('nama',document.getElementById('editNama').value.trim());
+ formData.append('username',document.getElementById('editUsername').value.trim());
+ formData.append('email',document.getElementById('editEmail').value.trim());
+ formData.append('no_hp',document.getElementById('editTelepon').value.trim());
+ formData.append('alamat',document.getElementById('editAlamat').value.trim());
+ formData.append('nomor_ktp',document.getElementById('editKtp').value.trim());
+ const foto=document.getElementById('editFotoKtp').files[0];
+ if(foto)formData.append('foto_ktp',foto);
  try{
-  const result=unwrap(await apiFetch('/auth/profil',{method:'PUT',body:JSON.stringify(payload)}));
-  currentUser={...(currentUser||{}),...(result.user||result||payload)};
+  const result=unwrap(await apiFetch('/auth/profil',{method:'PUT',body:formData}));
+  currentUser={...(currentUser||{}),...(result.user||result||{})};
+  // Keep entered values visible if API returns only a partial user object.
+  currentUser={...currentUser,nama:formData.get('nama'),username:formData.get('username'),email:formData.get('email'),no_hp:formData.get('no_hp'),alamat:formData.get('alamat'),nomor_ktp:formData.get('nomor_ktp')};
+  if(result.foto_ktp_url||result.user?.foto_ktp_url)currentUser.foto_ktp_url=result.foto_ktp_url||result.user.foto_ktp_url;
   localStorage.setItem('user',JSON.stringify(currentUser));
   renderProfile();
   alert('Profil berhasil diperbarui.');
@@ -1359,6 +1533,11 @@ async function loginUser(event) {
         }
 
         if (role === 'pelanggan') {
+            // Pelanggan wajib melengkapi nomor KTP 16 digit dan foto KTP sebelum masuk.
+            if (!hasCompleteKtp(user)) {
+                throw new Error('Akun belum dapat masuk karena data KTP belum lengkap. Silakan lengkapi nomor KTP dan unggah foto KTP saat pendaftaran, atau hubungi admin untuk bantuan.');
+            }
+
             token = data.token;
             currentUser = user;
             localStorage.setItem('token', token);
@@ -1417,6 +1596,16 @@ async function init() {
     }
 
     if (role === 'pelanggan') {
+        if (!hasCompleteKtp(user)) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            token = '';
+            currentUser = null;
+            showPage('login');
+            alert('Akun belum dapat digunakan karena nomor KTP atau foto KTP belum lengkap. Silakan hubungi admin untuk melengkapi data.');
+            return;
+        }
+
         document.getElementById('welcomeName').textContent =
             'Halo, ' + (user.nama || user.nama_lengkap || 'Pelanggan') + '!';
 
@@ -1446,34 +1635,74 @@ document.getElementById('endDate').addEventListener('change', updateCheckoutSumm
 
 document.getElementById('registerForm').addEventListener('submit', async (e) => {
   e.preventDefault();
-  const nama = document.getElementById('regNama').value.trim();
-  const email = document.getElementById('regEmail').value.trim();
   const password = document.getElementById('regPassword').value;
   const konfirmasi = document.getElementById('regKonfirmasi').value;
+  const ktp = document.getElementById('regKtp').value.trim();
+  const foto = document.getElementById('regFotoKtp').files[0];
 
-  if (password !== konfirmasi) {
-    alert('Konfirmasi password tidak sama');
-    return;
-  }
+  if (password !== konfirmasi) return alert('Konfirmasi password tidak sama.');
+  if (!/^\d{16}$/.test(ktp)) return alert('Nomor KTP harus terdiri dari 16 angka.');
+  if (!foto) return alert('Silakan unggah foto KTP.');
 
+  const formData = new FormData();
+  formData.append('nama', document.getElementById('regNama').value.trim());
+  formData.append('username', document.getElementById('regUsername').value.trim());
+  formData.append('email', document.getElementById('regEmail').value.trim());
+  formData.append('no_hp', document.getElementById('regTelepon').value.trim());
+  formData.append('alamat', document.getElementById('regAlamat').value.trim());
+  formData.append('nomor_ktp', ktp);
+  formData.append('foto_ktp', foto);
+  formData.append('password', password);
+
+  console.log('DATA FORM:', [...formData.entries()].map(([key, value]) => [
+  key,
+  value instanceof File ? value.name : value
+]));
   try {
-    const res = await fetch('/api/auth/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ nama, email, password }),
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      alert('Daftar gagal: ' + data.message);
-      return;
-    }
-    alert('Pendaftaran berhasil, silakan login');
-    window.location.href = '/';
+    const res = await fetch('/api/auth/register', { method: 'POST', body: formData });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.message || data.pesan || 'Pendaftaran gagal.');
+    alert('Pendaftaran berhasil, silakan login.');
+    showPage('login');
+    document.getElementById('registerForm').reset();
   } catch (err) {
-    alert('Terjadi kesalahan, silakan coba kembali');
+    alert('Daftar gagal: ' + err.message);
   }
 });
 
+
+function initPasswordToggles(){
+  document.querySelectorAll('input[type="password"]').forEach(input=>{
+    if(input.dataset.toggleReady==='true') return;
+
+    const wrapper=document.createElement('div');
+    wrapper.className='password-wrapper';
+    input.parentNode.insertBefore(wrapper,input);
+    wrapper.appendChild(input);
+
+    const button=document.createElement('button');
+    button.type='button';
+    button.className='password-toggle';
+    button.setAttribute('aria-label','Tampilkan password');
+    button.title='Tampilkan password';
+    button.innerHTML='<i class="fa-solid fa-eye" aria-hidden="true"></i>';
+    button.addEventListener('click',()=>{
+      const show=input.type==='password';
+      input.type=show?'text':'password';
+      button.innerHTML=show
+        ? '<i class="fa-solid fa-eye-slash" aria-hidden="true"></i>'
+        : '<i class="fa-solid fa-eye" aria-hidden="true"></i>';
+      button.setAttribute('aria-label',show?'Sembunyikan password':'Tampilkan password');
+      button.title=show?'Sembunyikan password':'Tampilkan password';
+      input.focus();
+    });
+    wrapper.appendChild(button);
+    input.dataset.toggleReady='true';
+  });
+}
+
+
+initPasswordToggles();
 init();
 
 </script>
