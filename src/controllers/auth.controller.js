@@ -76,10 +76,14 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    if (!email || !password) return fail(res, PESAN_LENGKAPI);
+
+    if (!email || !password) {
+      return fail(res, PESAN_LENGKAPI);
+    }
 
     const [rows] = await db.query(
-      `SELECT u.id_user, u.nama, u.username, u.email, u.password,
+      `SELECT u.id_user, u.username, u.nama, u.email, u.password,
+              u.no_hp, u.alamat, u.nomor_ktp, u.foto_ktp,
               u.status_verifikasi_ktp, r.nama_role AS role
        FROM users u
        JOIN roles r ON r.id_role = u.id_role
@@ -114,7 +118,9 @@ exports.login = async (req, res) => {
         username: user.username,
         nama: user.nama,
         email: user.email,
-        role: user.role
+        role: user.role,
+        nomor_ktp: user.nomor_ktp,
+        foto_ktp: user.foto_ktp
       }
     }, 'Login berhasil');
   } catch (e) {
@@ -127,15 +133,18 @@ exports.me = async (req, res) => {
   try {
     const [rows] = await db.query(
       `SELECT u.id_user, u.username, u.nama, u.email, u.no_hp,
-              u.alamat, u.nomor_ktp, u.status_verifikasi_ktp,
-              r.nama_role AS role
+              u.alamat, u.nomor_ktp, u.foto_ktp,
+              u.status_verifikasi_ktp, r.nama_role AS role
        FROM users u
        JOIN roles r ON r.id_role = u.id_role
        WHERE u.id_user = ?`,
       [req.user.id]
     );
 
-    if (!rows.length) return fail(res, 'Data pengguna tidak ditemukan', 404);
+    if (!rows.length) {
+      return fail(res, 'Data pengguna tidak ditemukan', 404);
+    }
+
     return success(res, rows[0]);
   } catch (e) {
     console.error(e);
@@ -146,7 +155,10 @@ exports.me = async (req, res) => {
 exports.ubahProfil = async (req, res) => {
   try {
     const { nama, email, no_hp, alamat } = req.body;
-    if (!nama || !email) return fail(res, PESAN_LENGKAPI);
+
+    if (!nama || !email) {
+      return fail(res, PESAN_LENGKAPI);
+    }
 
     await db.query(
       `UPDATE users SET nama = ?, email = ?, no_hp = ?, alamat = ?
@@ -198,7 +210,9 @@ exports.ubahKtp = async (req, res) => {
       [nomorBaru, fotoBaru, req.user.id]
     );
 
-    if (req.file && user.foto_ktp) hapusFotoKtp(user.foto_ktp);
+    if (req.file && user.foto_ktp) {
+      hapusFotoKtp(user.foto_ktp);
+    }
 
     return success(res, null, 'Data KTP diperbarui dan menunggu verifikasi admin');
   } catch (e) {

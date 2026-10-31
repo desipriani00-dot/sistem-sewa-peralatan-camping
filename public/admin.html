@@ -537,14 +537,35 @@ td {
 <section class="page" id="page-pelanggan">
     <div class="header">
         <h1>Kelola Pelanggan</h1>
-        <p>Data pelanggan yang terdaftar pada sistem.</p>
+        <p>Riwayat verifikasi KTP pelanggan.</p>
     </div>
 
     <div class="panel">
-        <p class="hint">
-            Endpoint daftar pelanggan khusus admin belum tersedia
-            pada route backend yang digunakan.
-        </p>
+        <div class="panel-header">
+            <h2>Riwayat Verifikasi KTP</h2>
+            <button class="btn btn-green" onclick="loadKtp()">
+                <i class="fa-solid fa-rotate"></i> Muat ulang
+            </button>
+        </div>
+
+        <div id="ktp-error"></div>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nama</th>
+                        <th>Email</th>
+                        <th>Nomor KTP</th>
+                        <th>Foto KTP</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="ktp-body">
+                    <tr><td colspan="5">Memuat data...</td></tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 </section>
 
@@ -1016,6 +1037,7 @@ function showPage(id) {
         b.classList.toggle('active', b.dataset.page === id);
     });
 
+    if (id === 'pelanggan') loadKtp();
     if (id === 'peralatan') loadAlat();
     if (id === 'penyewaan') loadOrders();
     if (id === 'pembayaran') loadPayments();
@@ -1454,6 +1476,67 @@ async function loadReturns() {
 
     document.getElementById('return-body').innerHTML =
         '<tr><td colspan="7" class="empty">Riwayat belum tersedia.</td></tr>';
+}
+
+/* RIWAYAT KTP */
+
+const KTP_ENDPOINTS = [
+    '/admin/pelanggan',
+    '/pelanggan',
+    '/admin/users',
+    '/users'
+];
+
+async function ambilDataPelanggan() {
+    let lastErr;
+
+    for (const ep of KTP_ENDPOINTS) {
+        try {
+            return arr(await api(ep));
+        } catch (e) {
+            lastErr = e;
+        }
+    }
+
+    throw new Error(
+        'Jalur daftar pelanggan belum ada di backend. ' +
+        (lastErr ? lastErr.message : '')
+    );
+}
+
+async function loadKtp() {
+    setError('ktp-error', '');
+
+    const body = document.getElementById('ktp-body');
+    body.innerHTML = '<tr><td colspan="5">Memuat...</td></tr>';
+
+    try {
+        const data = await ambilDataPelanggan();
+
+        const riwayat = data.filter(p => {
+            const s = String(p.status_verifikasi_ktp || '').toLowerCase();
+            return s === 'disetujui' || s === 'ditolak';
+        });
+
+        body.innerHTML = riwayat.length
+            ? riwayat.map(p => `
+                <tr>
+                    <td>${esc(p.nama)}</td>
+                    <td>${esc(p.email)}</td>
+                    <td>${esc(p.nomor_ktp || '-')}</td>
+                    <td>${
+                        p.foto_ktp
+                        ? `<a href="/uploads/${esc(p.foto_ktp)}" target="_blank" rel="noopener">Lihat</a>`
+                        : '-'
+                    }</td>
+                    <td><span class="status">${esc(p.status_verifikasi_ktp)}</span></td>
+                </tr>
+            `).join('')
+            : '<tr><td colspan="5" class="empty">Belum ada riwayat verifikasi.</td></tr>';
+    } catch (e) {
+        body.innerHTML = '<tr><td colspan="5">Riwayat gagal dimuat.</td></tr>';
+        setError('ktp-error', e.message);
+    }
 }
 
 /* DASHBOARD */
