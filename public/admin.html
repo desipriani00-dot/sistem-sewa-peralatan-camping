@@ -4,1555 +4,744 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dashboard Admin - SISEPCAMP</title>
-
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-
 <style>
-* {
-    box-sizing: border-box;
-    font-family: Poppins, sans-serif;
-}
-
-:root {
-    --gd: #216b2b;
-    --g: #32883d;
-    --gt: #287c35;
-    --bg: #f4f8f4;
-    --bd: #e6eee6;
-    --tx: #243328;
-    --mut: #718075;
-}
-
-body {
-    margin: 0;
-    background: var(--bg);
-    color: var(--tx);
-    font-size: 13px;
-}
-
-.sidebar {
-    position: fixed;
-    inset: 0 auto 0 0;
-    width: 240px;
-    padding: 22px 14px;
-    background: var(--gd);
-    color: white;
-    display: flex;
-    flex-direction: column;
-    z-index: 5;
-    overflow-y: auto;
-}
-
-.logo-box {
-    text-align: center;
-    background: var(--g);
-    border-radius: 16px;
-    padding: 18px 10px;
-    margin-bottom: 25px;
-}
-
-.logo-icon {
-    font-size: 34px;
-    background: white;
-    color: var(--gd);
-    border-radius: 50%;
-    width: 70px;
-    height: 70px;
-    display: grid;
-    place-items: center;
-    margin: 0 auto 10px;
-}
-
-.logo-box h2 {
-    margin: 0 0 4px;
-}
-
-.logo-box p {
-    margin: 0;
-    color: #e0f3e1;
-    font-size: 11px;
-}
-
-.menu-title {
-    font-size: 10px;
-    letter-spacing: 1px;
-    color: #bfe2c2;
-    margin: 0 12px 10px;
-}
-
-.menu-sidebar {
-    display: grid;
-    gap: 6px;
-}
-
-.menu-sidebar button,
-.logout-btn {
-    border: 0;
-    cursor: pointer;
-    color: white;
-    background: transparent;
-    padding: 12px;
-    border-radius: 10px;
-    text-align: left;
-    display: flex;
-    gap: 12px;
-    align-items: center;
-    font-size: 13px;
-    font-weight: 600;
-}
-
-.menu-sidebar button.active,
-.menu-sidebar button:hover {
-    background: white;
-    color: var(--gt);
-}
-
-.logout-btn {
-    margin-top: auto;
-    background: #c92525;
-    justify-content: center;
-}
-
-.content {
-    margin-left: 240px;
-    padding: 26px;
-    max-width: 1600px;
-}
-
-.page {
-    display: none;
-}
-
-.page.active {
-    display: block;
-}
-
-.header,
-.panel,
-.stat-card {
-    background: white;
-    border: 1px solid var(--bd);
-    border-radius: 14px;
-}
-
-.header {
-    padding: 22px;
-    margin-bottom: 20px;
-}
-
-.header h1 {
-    margin: 0 0 6px;
-    color: #285f30;
-    font-size: 24px;
-}
-
-.header p {
-    margin: 0;
-    color: var(--mut);
-}
-
-.stats {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 14px;
-    margin-bottom: 20px;
-}
-
-.stat-card {
-    padding: 18px;
-    min-width: 0;
-}
-
-.stat-card p {
-    margin: 8px 0 4px;
-    color: var(--mut);
-}
-
-.stat-card h2 {
-    margin: 0;
-    color: #285f30;
-    font-size: 22px;
-    overflow-wrap: anywhere;
-}
-
-.stat-icon {
-    width: 40px;
-    height: 40px;
-    display: grid;
-    place-items: center;
-    border-radius: 10px;
-    background: #e8f5e9;
-    color: var(--gt);
-    font-size: 17px;
-}
-
-.panel {
-    padding: 20px;
-    margin-bottom: 20px;
-    min-width: 0;
-}
-
-.panel-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
-    margin-bottom: 16px;
-}
-
-.panel-header h2,
-.panel > h2 {
-    margin: 0;
-    color: #285f30;
-    font-size: 17px;
-}
-
-.btn {
-    border: 0;
-    border-radius: 8px;
-    padding: 9px 13px;
-    color: white;
-    cursor: pointer;
-    font-size: 11px;
-    font-weight: 600;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    margin: 2px;
-}
-
-.btn:disabled {
-    opacity: .6;
-    cursor: not-allowed;
-}
-
-.btn-green { background: var(--g); }
-.btn-blue { background: #3b82f6; }
-.btn-red { background: #ef4444; }
-.btn-yellow { background: #f59e0b; }
-.btn-gray { background: #64748b; }
-
-.field {
-    width: 100%;
-    border: 1px solid var(--bd);
-    border-radius: 8px;
-    padding: 10px 12px;
-    font-size: 12px;
-    background: white;
-    color: var(--tx);
-}
-
-.search {
-    max-width: 280px;
-}
-
-.table-wrap {
-    overflow-x: auto;
-}
-
-table {
-    border-collapse: collapse;
-    width: 100%;
-    min-width: 700px;
-}
-
-th {
-    background: #e8f5e9;
-    color: #285f30;
-    text-align: left;
-    padding: 12px;
-    font-size: 11px;
-    white-space: nowrap;
-}
-
-td {
-    padding: 11px 12px;
-    border-bottom: 1px solid var(--bd);
-    font-size: 12px;
-    vertical-align: top;
-}
-
-.status {
-    display: inline-block;
-    border-radius: 20px;
-    padding: 4px 9px;
-    background: #e8f5e9;
-    color: #287c35;
-    font-size: 10px;
-    font-weight: 700;
-}
-
-.error {
-    color: #b42318;
-    background: #fff0ee;
-    padding: 10px;
-    border-radius: 8px;
-    margin: 10px 0;
-    overflow-wrap: anywhere;
-}
-
-.hint {
-    color: var(--mut);
-    font-size: 11px;
-    line-height: 1.7;
-}
-
-.modal {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: #0008;
-    z-index: 20;
-    align-items: center;
-    justify-content: center;
-    padding: 18px;
-}
-
-.modal.show {
-    display: flex;
-}
-
-.modal-box {
-    background: white;
-    width: 100%;
-    max-width: 520px;
-    max-height: 90vh;
-    overflow: auto;
-    padding: 22px;
-    border-radius: 15px;
-}
-
-.modal-box h2 {
-    margin: 0 0 18px;
-    color: #285f30;
-}
-
-.form-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-}
-
-.form-group {
-    margin-bottom: 13px;
-    min-width: 0;
-}
-
-.form-group label {
-    display: block;
-    font-weight: 600;
-    font-size: 11px;
-    margin-bottom: 6px;
-}
-
-.form-group.full {
-    grid-column: 1 / -1;
-}
-
-.empty {
-    padding: 22px;
-    text-align: center;
-    color: var(--mut);
-}
-
-.actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-}
-
-@media (max-width: 1000px) {
-    .sidebar {
-        width: 200px;
-    }
-
-    .content {
-        margin-left: 200px;
-        padding: 16px;
-    }
-
-    .stats {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-}
-
-@media (max-width: 600px) {
-    .sidebar {
-        position: static;
-        width: 100%;
-        height: auto;
-    }
-
-    .logo-box {
-        margin-bottom: 12px;
-    }
-
-    .menu-sidebar {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .logout-btn {
-        margin-top: 12px;
-    }
-
-    .content {
-        margin-left: 0;
-        padding: 12px;
-    }
-
-    .stats {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .form-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .form-group.full {
-        grid-column: auto;
-    }
-
-    .header h1 {
-        font-size: 20px;
-    }
-
-    .panel {
-        padding: 14px;
-    }
-}
+*{box-sizing:border-box;font-family:Poppins,sans-serif}
+:root{--gd:#216b2b;--g:#32883d;--gt:#287c35;--bg:#f4f8f4;--bd:#e6eee6;--tx:#243328;--mut:#718075}
+body{margin:0;background:var(--bg);color:var(--tx);font-size:13px}
+.sidebar{position:fixed;inset:0 auto 0 0;width:240px;padding:22px 14px;background:var(--gd);color:#fff;display:flex;flex-direction:column;z-index:5;overflow-y:auto}
+.logo-box{text-align:center;background:var(--g);border-radius:16px;padding:18px 10px;margin-bottom:25px}
+.logo-icon{font-size:34px;background:#fff;color:var(--gd);border-radius:50%;width:70px;height:70px;display:grid;place-items:center;margin:0 auto 10px}
+.logo-box h2{margin:0 0 4px}.logo-box p{margin:0;color:#e0f3e1;font-size:11px}
+.menu-title{font-size:10px;letter-spacing:1px;color:#bfe2c2;margin:0 12px 10px}
+.menu-sidebar{display:grid;gap:6px}
+.menu-sidebar button,.logout-btn{border:0;cursor:pointer;color:#fff;background:transparent;padding:12px;border-radius:10px;text-align:left;display:flex;gap:12px;align-items:center;font-size:13px;font-weight:600}
+.menu-sidebar button.active,.menu-sidebar button:hover{background:#fff;color:var(--gt)}
+.logout-btn{margin-top:auto;background:#c92525;justify-content:center}
+.content{margin-left:240px;padding:26px;max-width:1600px}
+.page{display:none}.page.active{display:block}
+.header,.panel,.stat-card{background:#fff;border:1px solid var(--bd);border-radius:14px}
+.header{padding:22px;margin-bottom:20px}
+.header h1{margin:0 0 6px;color:#285f30;font-size:24px}.header p{margin:0;color:var(--mut)}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:20px}
+.stat-card{padding:18px;min-width:0}
+.stat-card p{margin:8px 0 4px;color:var(--mut)}
+.stat-card h2{margin:0;color:#285f30;font-size:22px;overflow-wrap:anywhere}
+.stat-icon{width:40px;height:40px;display:grid;place-items:center;border-radius:10px;background:#e8f5e9;color:var(--gt);font-size:17px}
+.panel{padding:20px;margin-bottom:20px;min-width:0}
+.panel-header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.panel-header h2,.panel>h2{margin:0;color:#285f30;font-size:17px}
+.btn{border:0;border-radius:8px;padding:9px 13px;color:#fff;cursor:pointer;font-size:11px;font-weight:600;display:inline-flex;align-items:center;gap:6px;margin:2px}
+.btn:disabled{opacity:.6;cursor:not-allowed}
+.btn-green{background:var(--g)}.btn-blue{background:#3b82f6}.btn-red{background:#ef4444}.btn-yellow{background:#f59e0b}.btn-gray{background:#64748b}
+.field{width:100%;border:1px solid var(--bd);border-radius:8px;padding:10px 12px;font-size:12px;background:#fff;color:var(--tx)}
+.search{max-width:280px}
+.table-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:700px}
+th{background:#e8f5e9;color:#285f30;text-align:left;padding:12px;font-size:11px;white-space:nowrap}
+td{padding:11px 12px;border-bottom:1px solid var(--bd);font-size:12px;vertical-align:top}
+.status{display:inline-block;border-radius:20px;padding:4px 9px;background:#e8f5e9;color:#287c35;font-size:10px;font-weight:700}
+.status.menunggu{background:#fef3c7;color:#b45309}
+.status.ditolak{background:#fee2e2;color:#b91c1c}
+.error{color:#b42318;background:#fff0ee;padding:10px;border-radius:8px;margin:10px 0;overflow-wrap:anywhere}
+.hint{color:var(--mut);font-size:11px;line-height:1.7}
+.modal{display:none;position:fixed;inset:0;background:#0008;z-index:20;align-items:center;justify-content:center;padding:18px}
+.modal.show{display:flex}
+.modal-box{background:#fff;width:100%;max-width:520px;max-height:90vh;overflow:auto;padding:22px;border-radius:15px}
+.modal-box.wide{max-width:640px}
+.modal-box h2{margin:0 0 18px;color:#285f30}
+.proof-info{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;margin-bottom:14px;font-size:12px}
+.proof-info span{color:var(--mut)}
+.proof-view{border:1px solid var(--bd);border-radius:10px;padding:8px;text-align:center;background:#fafcfa;margin-bottom:14px}
+.proof-view img{max-width:100%;max-height:60vh;border-radius:8px}
+.proof-view iframe{width:100%;height:60vh;border:0}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-group{margin-bottom:13px;min-width:0}
+.form-group label{display:block;font-weight:600;font-size:11px;margin-bottom:6px}
+.form-group.full{grid-column:1/-1}
+.empty{padding:22px;text-align:center;color:var(--mut)}
+.row-end{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+@media(max-width:1000px){.sidebar{width:200px}.content{margin-left:200px;padding:16px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.sidebar{position:static;width:100%;height:auto}.logo-box{margin-bottom:12px}.menu-sidebar{grid-template-columns:repeat(2,minmax(0,1fr))}.logout-btn{margin-top:12px}.content{margin-left:0;padding:12px}.form-grid,.proof-info{grid-template-columns:1fr}.form-group.full{grid-column:auto}.header h1{font-size:20px}.panel{padding:14px}}
 </style>
 </head>
-
 <body>
 
 <aside class="sidebar">
-    <div class="logo-box">
-        <div class="logo-icon">
-            <i class="fa-solid fa-campground"></i>
-        </div>
-        <h2>SISEPCAMP</h2>
-        <p>Panel Admin</p>
-    </div>
-
-    <div class="menu-title">MENU ADMIN</div>
-
-    <nav class="menu-sidebar">
-        <button class="active" data-page="dashboard">
-            <i class="fa-solid fa-house"></i> Dashboard
-        </button>
-
-        <button data-page="pelanggan">
-            <i class="fa-solid fa-users"></i> Kelola Pelanggan
-        </button>
-
-        <button data-page="peralatan">
-            <i class="fa-solid fa-box-open"></i> Data Peralatan
-        </button>
-
-        <button data-page="penyewaan">
-            <i class="fa-solid fa-file-contract"></i> Data Penyewaan
-        </button>
-
-        <button data-page="pembayaran">
-            <i class="fa-solid fa-money-bill"></i> Pembayaran
-        </button>
-
-        <button data-page="pengembalian">
-            <i class="fa-solid fa-arrow-rotate-left"></i> Pengembalian
-        </button>
-
-        <button data-page="laporan">
-            <i class="fa-solid fa-chart-column"></i> Laporan
-        </button>
-    </nav>
-
-    <button class="logout-btn" id="logout">
-        <i class="fa-solid fa-right-from-bracket"></i> Logout
-    </button>
+  <div class="logo-box">
+    <div class="logo-icon"><i class="fa-solid fa-campground"></i></div>
+    <h2>SISEPCAMP</h2><p>Panel Admin</p>
+  </div>
+  <div class="menu-title">MENU ADMIN</div>
+  <nav class="menu-sidebar">
+    <button class="active" data-page="dashboard"><i class="fa-solid fa-house"></i> Dashboard</button>
+    <button data-page="pelanggan"><i class="fa-solid fa-users"></i> Kelola Pelanggan</button>
+    <button data-page="peralatan"><i class="fa-solid fa-box-open"></i> Data Peralatan</button>
+    <button data-page="penyewaan"><i class="fa-solid fa-file-contract"></i> Data Penyewaan</button>
+    <button data-page="pembayaran"><i class="fa-solid fa-money-bill"></i> Pembayaran</button>
+    <button data-page="pengembalian"><i class="fa-solid fa-arrow-rotate-left"></i> Pengembalian</button>
+    <button data-page="laporan"><i class="fa-solid fa-chart-column"></i> Laporan</button>
+  </nav>
+  <button class="logout-btn" id="logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
 </aside>
 
 <main class="content">
 
 <section class="page active" id="page-dashboard">
-    <div class="header">
-        <h1>Dashboard Admin</h1>
-        <p id="welcome">Memuat ringkasan SISEPCAMP...</p>
-    </div>
-
-    <div class="stats">
-        <div class="stat-card">
-            <div class="stat-icon"><i class="fa-solid fa-box"></i></div>
-            <p>Total Peralatan</p>
-            <h2 id="stat-alat">—</h2>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-icon"><i class="fa-solid fa-file-contract"></i></div>
-            <p>Total Penyewaan</p>
-            <h2 id="stat-order">—</h2>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-icon"><i class="fa-solid fa-clock"></i></div>
-            <p>Pesanan Menunggu</p>
-            <h2 id="stat-wait">—</h2>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-icon"><i class="fa-solid fa-money-check-dollar"></i></div>
-            <p>Pembayaran Menunggu</p>
-            <h2 id="stat-pay">—</h2>
-        </div>
-    </div>
-
-    <div class="panel">
-        <div class="panel-header">
-            <h2>Pesanan Terbaru</h2>
-            <button class="btn btn-green" onclick="loadAll()">
-                <i class="fa-solid fa-rotate"></i> Muat ulang
-            </button>
-        </div>
-
-        <div class="table-wrap">
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Pelanggan</th>
-                        <th>Tanggal Sewa</th>
-                        <th>Total</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody id="recent-body">
-                    <tr><td colspan="5">Memuat data...</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
+  <div class="header"><h1>Dashboard Admin</h1><p id="welcome">Memuat ringkasan SISEPCAMP...</p></div>
+  <div class="stats">
+    <div class="stat-card"><div class="stat-icon"><i class="fa-solid fa-box"></i></div><p>Total Peralatan</p><h2 id="stat-alat">—</h2></div>
+    <div class="stat-card"><div class="stat-icon"><i class="fa-solid fa-file-contract"></i></div><p>Total Penyewaan</p><h2 id="stat-order">—</h2></div>
+    <div class="stat-card"><div class="stat-icon"><i class="fa-solid fa-clock"></i></div><p>Pesanan Menunggu</p><h2 id="stat-wait">—</h2></div>
+    <div class="stat-card"><div class="stat-icon"><i class="fa-solid fa-money-check-dollar"></i></div><p>Pembayaran Menunggu</p><h2 id="stat-pay">—</h2></div>
+  </div>
+  <div class="panel">
+    <div class="panel-header"><h2>Pesanan Terbaru</h2>
+      <button class="btn btn-green" onclick="loadAll()"><i class="fa-solid fa-rotate"></i> Muat ulang</button></div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>ID</th><th>Pelanggan</th><th>Tanggal Sewa</th><th>Total</th><th>Status</th></tr></thead>
+      <tbody id="recent-body"><tr><td colspan="5">Memuat data...</td></tr></tbody>
+    </table></div>
+  </div>
 </section>
 
 <section class="page" id="page-pelanggan">
-    <div class="header">
-        <h1>Kelola Pelanggan</h1>
-        <p>Riwayat verifikasi KTP pelanggan.</p>
+  <div class="header"><h1>Kelola Pelanggan</h1><p>Verifikasi KTP pelanggan dan riwayatnya.</p></div>
+  <div id="ktp-error"></div>
+
+  <div class="panel">
+    <div class="panel-header">
+      <h2>Menunggu Verifikasi</h2>
+      <button class="btn btn-green" onclick="loadKtp()"><i class="fa-solid fa-rotate"></i> Muat ulang</button>
     </div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Nama</th><th>Email</th><th>Nomor KTP</th><th>Foto KTP</th><th>Status</th><th>Aksi</th></tr></thead>
+      <tbody id="ktp-wait-body"><tr><td colspan="6">Memuat data...</td></tr></tbody>
+    </table></div>
+  </div>
 
-    <div class="panel">
-        <div class="panel-header">
-            <h2>Riwayat Verifikasi KTP</h2>
-            <button class="btn btn-green" onclick="loadKtp()">
-                <i class="fa-solid fa-rotate"></i> Muat ulang
-            </button>
-        </div>
-
-        <div id="ktp-error"></div>
-
-        <div class="table-wrap">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Nama</th>
-                        <th>Email</th>
-                        <th>Nomor KTP</th>
-                        <th>Foto KTP</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody id="ktp-body">
-                    <tr><td colspan="5">Memuat data...</td></tr>
-                </tbody>
-            </table>
-        </div>
+  <div class="panel">
+    <div class="panel-header">
+      <h2>Riwayat Verifikasi KTP</h2>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <select id="ktp-filter" class="field" style="width:auto">
+          <option value="">Semua (disetujui + ditolak)</option>
+          <option value="disetujui">Disetujui</option>
+          <option value="ditolak">Ditolak</option>
+        </select>
+        <input id="ktp-search" class="field search" placeholder="Cari nama/email...">
+      </div>
     </div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Nama</th><th>Email</th><th>Nomor KTP</th><th>Foto KTP</th><th>Status</th><th>Diverifikasi oleh</th><th>Tanggal</th></tr></thead>
+      <tbody id="ktp-hist-body"><tr><td colspan="7">Memuat data...</td></tr></tbody>
+    </table></div>
+  </div>
 </section>
 
 <section class="page" id="page-peralatan">
-    <div class="header">
-        <h1>Data Peralatan</h1>
-        <p>Kelola inventaris yang tersimpan di database.</p>
+  <div class="header"><h1>Data Peralatan</h1><p>Kelola inventaris yang tersimpan di database.</p></div>
+  <div class="panel">
+    <div class="panel-header">
+      <button class="btn btn-green" onclick="openAlat()"><i class="fa-solid fa-plus"></i> Tambah Peralatan</button>
+      <input id="search-alat" class="field search" placeholder="Cari nama/kategori...">
     </div>
-
-    <div class="panel">
-        <div class="panel-header">
-            <button class="btn btn-green" onclick="openAlat()">
-                <i class="fa-solid fa-plus"></i> Tambah Peralatan
-            </button>
-
-            <input
-                id="search-alat"
-                class="field search"
-                placeholder="Cari nama/kategori..."
-            >
-        </div>
-
-        <div id="alat-error"></div>
-
-        <div class="table-wrap">
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Nama</th>
-                        <th>Kategori</th>
-                        <th>Stok</th>
-                        <th>Harga/Hari</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-
-                <tbody id="alat-body">
-                    <tr><td colspan="6">Memuat data...</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
+    <div id="alat-error"></div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>ID</th><th>Nama</th><th>Kategori</th><th>Stok</th><th>Harga/Hari</th><th>Aksi</th></tr></thead>
+      <tbody id="alat-body"><tr><td colspan="6">Memuat data...</td></tr></tbody>
+    </table></div>
+  </div>
 </section>
 
 <section class="page" id="page-penyewaan">
-    <div class="header">
-        <h1>Data Penyewaan</h1>
-        <p>Kelola dan periksa status pesanan pelanggan.</p>
-    </div>
-
-    <div class="panel">
-        <div class="panel-header">
-            <h2>Semua Pesanan</h2>
-            <button class="btn btn-green" onclick="loadOrders()">
-                <i class="fa-solid fa-rotate"></i> Muat ulang
-            </button>
-        </div>
-
-        <p class="hint">
-            Gunakan tombol ACC untuk menyetujui pesanan yang masih menunggu,
-            atau Tolak untuk menolaknya.
-        </p>
-
-        <div id="order-error"></div>
-
-        <div class="table-wrap">
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Pelanggan</th>
-                        <th>Tanggal Sewa</th>
-                        <th>Tanggal Kembali</th>
-                        <th>Total</th>
-                        <th>Status</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-
-                <tbody id="order-body">
-                    <tr><td colspan="7">Memuat data...</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
+  <div class="header"><h1>Data Penyewaan</h1><p>Kelola dan periksa status pesanan pelanggan.</p></div>
+  <div class="panel">
+    <div class="panel-header"><h2>Semua Pesanan</h2>
+      <button class="btn btn-green" onclick="loadOrders()"><i class="fa-solid fa-rotate"></i> Muat ulang</button></div>
+    <p class="hint">Gunakan tombol ACC untuk menyetujui pesanan yang masih menunggu, atau Tolak untuk menolaknya.</p>
+    <div id="order-error"></div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>ID</th><th>Pelanggan</th><th>Tanggal Sewa</th><th>Tanggal Kembali</th><th>Total</th><th>Status</th><th>Aksi</th></tr></thead>
+      <tbody id="order-body"><tr><td colspan="7">Memuat data...</td></tr></tbody>
+    </table></div>
+  </div>
 </section>
 
 <section class="page" id="page-pembayaran">
-    <div class="header">
-        <h1>Pembayaran</h1>
-        <p>Periksa bukti pembayaran dan verifikasi transaksi.</p>
-    </div>
+  <div class="header"><h1>Pembayaran</h1><p>Periksa bukti pembayaran, verifikasi atau tolak transaksi.</p></div>
 
-    <div class="panel">
-        <div class="panel-header">
-            <h2>Daftar Pembayaran</h2>
-            <button class="btn btn-green" onclick="loadPayments()">
-                <i class="fa-solid fa-rotate"></i> Muat ulang
-            </button>
-        </div>
+  <div class="panel">
+    <div class="panel-header"><h2>Menunggu Verifikasi</h2>
+      <button class="btn btn-green" onclick="loadPayments()"><i class="fa-solid fa-rotate"></i> Muat ulang</button></div>
+    <div id="pay-error"></div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>ID</th><th>ID Pesanan</th><th>Pelanggan</th><th>Jumlah</th><th>Metode</th><th>Bukti</th><th>Aksi</th></tr></thead>
+      <tbody id="pay-body"><tr><td colspan="7">Memuat data...</td></tr></tbody>
+    </table></div>
+  </div>
 
-        <div id="pay-error"></div>
-
-        <div class="table-wrap">
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>ID Pesanan</th>
-                        <th>Pelanggan</th>
-                        <th>Jumlah</th>
-                        <th>Metode</th>
-                        <th>Bukti</th>
-                        <th>Status</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-
-                <tbody id="pay-body">
-                    <tr><td colspan="8">Memuat data...</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
+  <div class="panel">
+    <div class="panel-header"><h2>Riwayat Pembayaran</h2>
+      <input id="search-hist" class="field search" placeholder="Cari nama pelanggan..."></div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>ID</th><th>ID Pesanan</th><th>Pelanggan</th><th>Jumlah</th><th>Metode</th><th>Tanggal</th><th>Status</th><th>Bukti</th></tr></thead>
+      <tbody id="hist-body"><tr><td colspan="8">Memuat data...</td></tr></tbody>
+    </table></div>
+  </div>
 </section>
 
 <section class="page" id="page-pengembalian">
-    <div class="header">
-        <h1>Pengembalian</h1>
-        <p>Serahkan alat dan catat kondisi pengembalian.</p>
+  <div class="header"><h1>Pengembalian</h1><p>Serahkan alat dan catat kondisi pengembalian.</p></div>
+
+  <div class="panel">
+    <h2>Serah-terima dan Pengembalian Alat</h2>
+    <p class="hint">Serah-terima dilakukan jika pesanan sudah dibayar. Pengembalian dicatat setelah alat berstatus dipinjam.</p>
+    <div class="form-group" style="margin-top:18px">
+      <label for="return-order-id">ID Pemesanan</label>
+      <input id="return-order-id" class="field" type="number" min="1" placeholder="Masukkan ID pemesanan">
+      <div class="hint" id="return-name" style="margin-top:6px"></div>
     </div>
-
-    <div class="panel">
-        <h2>Serah-terima dan Pengembalian Alat</h2>
-
-        <p class="hint">
-            Serah-terima dilakukan jika pesanan sudah dibayar.
-            Pengembalian dicatat setelah alat berstatus dipinjam.
-        </p>
-
-        <div class="form-group" style="margin-top:18px">
-            <label for="return-order-id">ID Pemesanan</label>
-            <input
-                id="return-order-id"
-                class="field"
-                type="number"
-                min="1"
-                placeholder="Masukkan ID pemesanan"
-            >
-        </div>
-
-        <div style="margin-bottom:18px">
-            <button
-                class="btn btn-blue"
-                id="btn-serahkan"
-                onclick="serahkanAlat()"
-            >
-                <i class="fa-solid fa-handshake"></i> Serahkan Alat
-            </button>
-        </div>
-
-        <div class="form-grid">
-            <div class="form-group">
-                <label for="return-condition">Kondisi Alat</label>
-                <select id="return-condition" class="field">
-                    <option value="baik">Baik</option>
-                    <option value="rusak_ringan">Rusak ringan</option>
-                    <option value="rusak_berat">Rusak berat</option>
-                    <option value="hilang">Hilang</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="return-fine">Denda (Rp)</label>
-                <input
-                    id="return-fine"
-                    class="field"
-                    type="number"
-                    min="0"
-                    value="0"
-                >
-            </div>
-
-            <div class="form-group full">
-                <label for="return-note">Catatan</label>
-                <textarea
-                    id="return-note"
-                    class="field"
-                    rows="3"
-                    placeholder="Catatan kondisi alat (opsional)"
-                ></textarea>
-            </div>
-        </div>
-
-        <button
-            class="btn btn-green"
-            id="btn-catat-return"
-            onclick="catatPengembalian()"
-        >
-            <i class="fa-solid fa-check"></i> Catat Pengembalian
-        </button>
-
-        <div id="return-action-error"></div>
+    <div style="margin-bottom:18px">
+      <button class="btn btn-blue" id="btn-serahkan" onclick="serahkanAlat()"><i class="fa-solid fa-handshake"></i> Serahkan Alat</button>
     </div>
-
-    <div class="panel">
-        <div class="panel-header">
-            <h2>Riwayat Pengembalian</h2>
-            <button class="btn btn-green" onclick="loadReturns()">
-                <i class="fa-solid fa-rotate"></i> Muat ulang
-            </button>
-        </div>
-
-        <div id="return-error" class="hint"></div>
-
-        <div class="table-wrap">
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID Pengembalian</th>
-                        <th>ID Pesanan</th>
-                        <th>Tanggal Aktual</th>
-                        <th>Terlambat</th>
-                        <th>Denda</th>
-                        <th>Kondisi</th>
-                        <th>Catatan</th>
-                    </tr>
-                </thead>
-
-                <tbody id="return-body">
-                    <tr><td colspan="7">Riwayat belum tersedia.</td></tr>
-                </tbody>
-            </table>
-        </div>
+    <div class="form-grid">
+      <div class="form-group"><label for="return-condition">Kondisi Alat</label>
+        <select id="return-condition" class="field">
+          <option value="baik">Baik</option><option value="rusak_ringan">Rusak ringan</option>
+          <option value="rusak_berat">Rusak berat</option><option value="hilang">Hilang</option>
+        </select></div>
+      <div class="form-group"><label for="return-fine">Denda (Rp)</label>
+        <input id="return-fine" class="field" type="number" min="0" value="0"></div>
+      <div class="form-group full"><label for="return-note">Catatan</label>
+        <textarea id="return-note" class="field" rows="3" placeholder="Catatan kondisi alat (opsional)"></textarea></div>
     </div>
+    <button class="btn btn-green" id="btn-catat-return" onclick="catatPengembalian()"><i class="fa-solid fa-check"></i> Catat Pengembalian</button>
+    <div id="return-action-error"></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header"><h2>Riwayat Pengembalian</h2>
+      <button class="btn btn-green" onclick="loadReturns()"><i class="fa-solid fa-rotate"></i> Muat ulang</button></div>
+    <div id="return-error" class="hint"></div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>ID</th><th>ID Pesanan</th><th>Pelanggan</th><th>Tanggal Aktual</th><th>Terlambat</th><th>Denda</th><th>Kondisi</th><th>Catatan</th></tr></thead>
+      <tbody id="return-body"><tr><td colspan="8">Memuat data...</td></tr></tbody>
+    </table></div>
+  </div>
 </section>
 
 <section class="page" id="page-laporan">
-    <div class="header">
-        <h1>Laporan</h1>
-        <p>Ringkasan berdasarkan data yang berhasil diambil dari API.</p>
-    </div>
-
-    <div class="stats">
-        <div class="stat-card">
-            <p>Total Peralatan</p>
-            <h2 id="report-alat">—</h2>
-        </div>
-
-        <div class="stat-card">
-            <p>Total Pesanan</p>
-            <h2 id="report-order">—</h2>
-        </div>
-
-        <div class="stat-card">
-            <p>Total Nilai Pesanan</p>
-            <h2 id="report-total">—</h2>
-        </div>
-
-        <div class="stat-card">
-            <p>Pembayaran Berhasil</p>
-            <h2 id="report-paid">—</h2>
-        </div>
-    </div>
-
-    <div class="panel">
-        <p class="hint">
-            Ringkasan dihitung dari data API yang tersedia.
-        </p>
-
-        <button class="btn btn-green" onclick="loadAll()">
-            <i class="fa-solid fa-rotate"></i> Perbarui laporan
-        </button>
-    </div>
+  <div class="header"><h1>Laporan</h1><p>Ringkasan berdasarkan data yang berhasil diambil dari API.</p></div>
+  <div class="stats">
+    <div class="stat-card"><p>Total Peralatan</p><h2 id="report-alat">—</h2></div>
+    <div class="stat-card"><p>Total Pesanan</p><h2 id="report-order">—</h2></div>
+    <div class="stat-card"><p>Total Nilai Pesanan</p><h2 id="report-total">—</h2></div>
+    <div class="stat-card"><p>Pembayaran Berhasil</p><h2 id="report-paid">—</h2></div>
+  </div>
+  <div class="panel">
+    <p class="hint">Ringkasan dihitung dari data API yang tersedia.</p>
+    <button class="btn btn-green" onclick="loadAll()"><i class="fa-solid fa-rotate"></i> Perbarui laporan</button>
+  </div>
 </section>
 
 </main>
 
+<!-- Modal peralatan -->
 <div class="modal" id="alat-modal">
-    <div class="modal-box">
-        <h2 id="alat-modal-title">Tambah Peralatan</h2>
-
-        <form id="alat-form">
-            <input type="hidden" id="alat-id">
-
-            <div class="form-grid">
-                <div class="form-group full">
-                    <label for="alat-nama">Nama Peralatan</label>
-                    <input class="field" id="alat-nama" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="alat-kategori">Kategori</label>
-                    <input class="field" id="alat-kategori" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="alat-stok">Stok</label>
-                    <input
-                        class="field"
-                        id="alat-stok"
-                        type="number"
-                        min="0"
-                        required
-                    >
-                </div>
-
-                <div class="form-group">
-                    <label for="alat-harga">Harga sewa per hari (Rp)</label>
-                    <input
-                        class="field"
-                        id="alat-harga"
-                        type="number"
-                        min="0"
-                        required
-                    >
-                </div>
-
-                <div class="form-group">
-                    <label for="alat-gambar">URL/path gambar</label>
-                    <input class="field" id="alat-gambar">
-                </div>
-
-                <div class="form-group full">
-                    <label for="alat-deskripsi">Deskripsi</label>
-                    <textarea
-                        class="field"
-                        id="alat-deskripsi"
-                        rows="3"
-                    ></textarea>
-                </div>
-            </div>
-
-            <div style="display:flex;justify-content:flex-end;gap:8px">
-                <button
-                    type="button"
-                    class="btn btn-gray"
-                    onclick="closeAlat()"
-                >
-                    Batal
-                </button>
-
-                <button type="submit" class="btn btn-green">
-                    Simpan
-                </button>
-            </div>
-        </form>
-    </div>
+  <div class="modal-box">
+    <h2 id="alat-modal-title">Tambah Peralatan</h2>
+    <form id="alat-form">
+      <input type="hidden" id="alat-id">
+      <div class="form-grid">
+        <div class="form-group full"><label for="alat-nama">Nama Peralatan</label><input class="field" id="alat-nama" required></div>
+        <div class="form-group"><label for="alat-kategori">Kategori</label><input class="field" id="alat-kategori" required></div>
+        <div class="form-group"><label for="alat-stok">Stok</label><input class="field" id="alat-stok" type="number" min="0" required></div>
+        <div class="form-group"><label for="alat-harga">Harga sewa per hari (Rp)</label><input class="field" id="alat-harga" type="number" min="0" required></div>
+        <div class="form-group"><label for="alat-gambar">URL/path gambar</label><input class="field" id="alat-gambar"></div>
+        <div class="form-group full"><label for="alat-deskripsi">Deskripsi</label><textarea class="field" id="alat-deskripsi" rows="3"></textarea></div>
+      </div>
+      <div class="row-end">
+        <button type="button" class="btn btn-gray" onclick="closeAlat()">Batal</button>
+        <button type="submit" class="btn btn-green">Simpan</button>
+      </div>
+    </form>
+  </div>
 </div>
+
+<!-- Modal bukti pembayaran -->
+<div class="modal" id="bukti-modal">
+  <div class="modal-box wide">
+    <h2>Bukti Pembayaran</h2>
+    <div class="proof-info" id="bukti-info"></div>
+    <div class="proof-view" id="bukti-view"></div>
+    <div class="row-end" id="bukti-actions"></div>
+  </div>
+</div>
+
+<div class="modal" id="ktp-modal">
+  <div class="modal-box wide">
+    <h2>Foto KTP</h2>
+    <div class="proof-info" id="ktp-info"></div>
+    <div class="proof-view" id="ktp-view"></div>
+    <div class="row-end" id="ktp-actions"></div>
+  </div>
+</div>
+
 <script>
 const API = '/api';
+let alatData = [], orderData = [], paymentData = [], busyReturn = false;
 
-let alatData = [];
-let orderData = [];
-let paymentData = [];
-let busyReturn = false;
-
-function token() {
-    return localStorage.getItem('token') || '';
-}
-
-function getUser() {
-    try {
-        return JSON.parse(localStorage.getItem('user') || '{}');
-    } catch {
-        return {};
-    }
-}
-
-function rupiah(v) {
-    return new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR',
-        maximumFractionDigits: 0
-    }).format(Number(v) || 0);
-}
-
-function esc(v) {
-    return String(v ?? '').replace(/[&<>"']/g, c => ({
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#39;'
-    }[c]));
-}
-
-function arr(x) {
-    if (Array.isArray(x)) return x;
-    if (x && Array.isArray(x.data)) return x.data;
-    if (x && Array.isArray(x.rows)) return x.rows;
-    return [];
-}
+const token = () => localStorage.getItem('token') || '';
+const getUser = () => { try { return JSON.parse(localStorage.getItem('user') || '{}'); } catch { return {}; } };
+const rupiah = v => new Intl.NumberFormat('id-ID', {style:'currency', currency:'IDR', maximumFractionDigits:0}).format(Number(v) || 0);
+const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const arr = x => Array.isArray(x) ? x : (x && Array.isArray(x.data) ? x.data : (x && Array.isArray(x.rows) ? x.rows : []));
+const $ = id => document.getElementById(id);
+const low = v => String(v || '').toLowerCase();
 
 async function api(path, opts = {}) {
-    const headers = { ...(opts.headers || {}) };
-
-    if (token()) {
-        headers.Authorization = 'Bearer ' + token();
-    }
-
-    if (opts.body && !(opts.body instanceof FormData)) {
-        headers['Content-Type'] = 'application/json';
-    }
-
-    const res = await fetch(API + path, {
-        ...opts,
-        headers
-    });
-
-    let data = {};
-
-    try {
-        data = await res.json();
-    } catch {}
-
-    if (!res.ok) {
-        throw new Error(
-            data.message ||
-            data.error ||
-            `Permintaan gagal (${res.status})`
-        );
-    }
-
-    if (data && data.success === false) {
-        throw new Error(data.message || 'Permintaan gagal');
-    }
-
-    return data.data ?? data;
+  const headers = {...(opts.headers || {})};
+  if (token()) headers.Authorization = 'Bearer ' + token();
+  if (opts.body && !(opts.body instanceof FormData)) headers['Content-Type'] = 'application/json';
+  const res = await fetch(API + path, {...opts, headers});
+  let data = {};
+  try { data = await res.json(); } catch {}
+  if (!res.ok) throw new Error(data.message || data.error || `Permintaan gagal (${res.status})`);
+  if (data && data.success === false) throw new Error(data.message || 'Permintaan gagal');
+  return data.data ?? data;
 }
 
 function ensureAdmin() {
-    const u = getUser();
-
-    if (!token() || String(u.role || '').toLowerCase() !== 'admin') {
-        alert('Silakan masuk menggunakan akun admin.');
-        location.replace('/index.html');
-        return false;
-    }
-
-    document.getElementById('welcome').textContent =
-        'Selamat datang, ' + (u.nama || 'Admin') +
-        '. Data dimuat dari server SISEPCAMP.';
-
-    return true;
+  const u = getUser();
+  if (!token() || low(u.role) !== 'admin') {
+    alert('Silakan masuk menggunakan akun admin.');
+    location.replace('/index.html');
+    return false;
+  }
+  $('welcome').textContent = 'Selamat datang, ' + (u.nama || 'Admin') + '. Data dimuat dari server SISEPCAMP.';
+  return true;
 }
 
 function setError(id, msg) {
-    const el = document.getElementById(id);
-
-    if (el) {
-        el.innerHTML = msg
-            ? `<div class="error">${esc(msg)}</div>`
-            : '';
-    }
+  const el = $(id);
+  if (el) el.innerHTML = msg ? `<div class="error">${esc(msg)}</div>` : '';
 }
+
+/* NAMA PELANGGAN (dicari dari data pesanan / pembayaran) */
+function namaPesanan(idPesanan) {
+  const o = orderData.find(x => Number(x.id_pemesanan ?? x.id) === Number(idPesanan));
+  if (o && (o.nama_penyewa || o.nama)) return o.nama_penyewa || o.nama;
+  const p = paymentData.find(x => Number(x.id_pemesanan) === Number(idPesanan));
+  if (p && p.nama_penyewa) return p.nama_penyewa;
+  return '-';
+}
+
+const statusBadge = s => `<span class="status ${esc(low(s))}">${esc(s || '-')}</span>`;
 
 /* MENU */
-
 function showPage(id) {
-    document.querySelectorAll('.page').forEach(p => {
-        p.classList.remove('active');
-    });
-
-    document.getElementById('page-' + id)?.classList.add('active');
-
-    document.querySelectorAll('.menu-sidebar button').forEach(b => {
-        b.classList.toggle('active', b.dataset.page === id);
-    });
-
-    if (id === 'pelanggan') loadKtp();
-    if (id === 'peralatan') loadAlat();
-    if (id === 'penyewaan') loadOrders();
-    if (id === 'pembayaran') loadPayments();
-    if (id === 'pengembalian') loadReturns();
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  $('page-' + id)?.classList.add('active');
+  document.querySelectorAll('.menu-sidebar button').forEach(b => b.classList.toggle('active', b.dataset.page === id));
+  if (id === 'peralatan') loadAlat();
+  if (id === 'penyewaan') loadOrders();
+  if (id === 'pembayaran') loadPayments();
+  if (id === 'pengembalian') loadReturns();
+  if (id === 'pelanggan') loadKtp();
 }
-
-document.querySelectorAll('.menu-sidebar button').forEach(b => {
-    b.addEventListener('click', () => showPage(b.dataset.page));
-});
-
-document.getElementById('logout').addEventListener('click', () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    location.href = '/index.html';
+document.querySelectorAll('.menu-sidebar button').forEach(b => b.addEventListener('click', () => showPage(b.dataset.page)));
+$('logout').addEventListener('click', () => {
+  localStorage.removeItem('token'); localStorage.removeItem('user');
+  location.href = '/index.html';
 });
 
 /* PERALATAN */
-
 async function loadAlat() {
-    setError('alat-error', '');
-
-    const body = document.getElementById('alat-body');
-    body.innerHTML = '<tr><td colspan="6">Memuat...</td></tr>';
-
-    try {
-        alatData = arr(await api('/alat'));
-        renderAlat();
-    } catch (e) {
-        body.innerHTML =
-            '<tr><td colspan="6">Data peralatan gagal dimuat.</td></tr>';
-
-        setError('alat-error', e.message);
-    }
+  setError('alat-error', '');
+  $('alat-body').innerHTML = '<tr><td colspan="6">Memuat...</td></tr>';
+  try { alatData = arr(await api('/alat')); renderAlat(); }
+  catch (e) {
+    $('alat-body').innerHTML = '<tr><td colspan="6">Data peralatan gagal dimuat.</td></tr>';
+    setError('alat-error', e.message);
+  }
 }
 
 function renderAlat() {
-    const q = (
-        document.getElementById('search-alat').value || ''
-    ).toLowerCase();
-
-    const rows = alatData.filter(a =>
-        `${a.nama_alat || ''} ${a.kategori || ''}`
-            .toLowerCase()
-            .includes(q)
-    );
-
-    document.getElementById('alat-body').innerHTML = rows.length
-        ? rows.map(a => `
-            <tr>
-                <td>${esc(a.id_alat)}</td>
-                <td>${esc(a.nama_alat)}</td>
-                <td>${esc(a.kategori)}</td>
-                <td>${esc(a.stok)}</td>
-                <td>${rupiah(a.harga_sewa_per_hari)}</td>
-                <td>
-                    <button class="btn btn-yellow"
-                        onclick="editAlat(${Number(a.id_alat)})">
-                        Edit
-                    </button>
-                    <button class="btn btn-red"
-                        onclick="hapusAlat(${Number(a.id_alat)})">
-                        Hapus
-                    </button>
-                </td>
-            </tr>
-        `).join('')
-        : '<tr><td colspan="6" class="empty">Belum ada data peralatan.</td></tr>';
-
-    document.getElementById('stat-alat').textContent = alatData.length;
-    document.getElementById('report-alat').textContent = alatData.length;
+  const q = low($('search-alat').value);
+  const rows = alatData.filter(a => low(`${a.nama_alat || ''} ${a.kategori || ''}`).includes(q));
+  $('alat-body').innerHTML = rows.length ? rows.map(a => `
+    <tr>
+      <td>${esc(a.id_alat)}</td><td>${esc(a.nama_alat)}</td><td>${esc(a.kategori)}</td>
+      <td>${esc(a.stok)}</td><td>${rupiah(a.harga_sewa_per_hari)}</td>
+      <td>
+        <button class="btn btn-yellow" onclick="editAlat(${Number(a.id_alat)})">Edit</button>
+        <button class="btn btn-red" onclick="hapusAlat(${Number(a.id_alat)})">Hapus</button>
+      </td>
+    </tr>`).join('') : '<tr><td colspan="6" class="empty">Belum ada data peralatan.</td></tr>';
+  $('stat-alat').textContent = alatData.length;
+  $('report-alat').textContent = alatData.length;
 }
-
-document.getElementById('search-alat').addEventListener('input', renderAlat);
+$('search-alat').addEventListener('input', renderAlat);
 
 function openAlat(a = null) {
-    document.getElementById('alat-form').reset();
-    document.getElementById('alat-id').value = a?.id_alat || '';
-
-    document.getElementById('alat-modal-title').textContent =
-        a ? 'Edit Peralatan' : 'Tambah Peralatan';
-
-    if (a) {
-        document.getElementById('alat-nama').value = a.nama_alat || '';
-        document.getElementById('alat-kategori').value = a.kategori || '';
-        document.getElementById('alat-stok').value = a.stok ?? 0;
-        document.getElementById('alat-harga').value =
-            a.harga_sewa_per_hari ?? 0;
-        document.getElementById('alat-gambar').value = a.gambar || '';
-        document.getElementById('alat-deskripsi').value = a.deskripsi || '';
-    }
-
-    document.getElementById('alat-modal').classList.add('show');
+  $('alat-form').reset();
+  $('alat-id').value = a?.id_alat || '';
+  $('alat-modal-title').textContent = a ? 'Edit Peralatan' : 'Tambah Peralatan';
+  if (a) {
+    $('alat-nama').value = a.nama_alat || '';
+    $('alat-kategori').value = a.kategori || '';
+    $('alat-stok').value = a.stok ?? 0;
+    $('alat-harga').value = a.harga_sewa_per_hari ?? 0;
+    $('alat-gambar').value = a.gambar || '';
+    $('alat-deskripsi').value = a.deskripsi || '';
+  }
+  $('alat-modal').classList.add('show');
 }
+const closeAlat = () => $('alat-modal').classList.remove('show');
+function editAlat(id) { const a = alatData.find(x => Number(x.id_alat) === Number(id)); if (a) openAlat(a); }
 
-function closeAlat() {
-    document.getElementById('alat-modal').classList.remove('show');
-}
-
-function editAlat(id) {
-    const a = alatData.find(x => Number(x.id_alat) === Number(id));
-    if (a) openAlat(a);
-}
-
-document.getElementById('alat-form').addEventListener('submit', async e => {
-    e.preventDefault();
-
-    const id = document.getElementById('alat-id').value;
-
-    const payload = {
-        nama_alat: document.getElementById('alat-nama').value.trim(),
-        kategori: document.getElementById('alat-kategori').value.trim(),
-        stok: Number(document.getElementById('alat-stok').value),
-        harga_sewa_per_hari: Number(
-            document.getElementById('alat-harga').value
-        ),
-        gambar: document.getElementById('alat-gambar').value.trim() || null,
-        deskripsi:
-            document.getElementById('alat-deskripsi').value.trim() || null
-    };
-
-    try {
-        await api('/alat' + (id ? '/' + id : ''), {
-            method: id ? 'PUT' : 'POST',
-            body: JSON.stringify(payload)
-        });
-
-        closeAlat();
-        await loadAlat();
-        alert('Data peralatan berhasil disimpan.');
-    } catch (err) {
-        alert('Gagal menyimpan peralatan: ' + err.message);
-    }
+$('alat-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const id = $('alat-id').value;
+  const payload = {
+    nama_alat: $('alat-nama').value.trim(),
+    kategori: $('alat-kategori').value.trim(),
+    stok: Number($('alat-stok').value),
+    harga_sewa_per_hari: Number($('alat-harga').value),
+    gambar: $('alat-gambar').value.trim() || null,
+    deskripsi: $('alat-deskripsi').value.trim() || null
+  };
+  try {
+    await api('/alat' + (id ? '/' + id : ''), {method: id ? 'PUT' : 'POST', body: JSON.stringify(payload)});
+    closeAlat(); await loadAlat(); alert('Data peralatan berhasil disimpan.');
+  } catch (err) { alert('Gagal menyimpan peralatan: ' + err.message); }
 });
 
 async function hapusAlat(id) {
-    if (!confirm('Yakin ingin menghapus peralatan ini?')) return;
-
-    try {
-        await api('/alat/' + id, { method: 'DELETE' });
-        await loadAlat();
-        alert('Peralatan berhasil dihapus.');
-    } catch (e) {
-        alert('Gagal menghapus peralatan: ' + e.message);
-    }
+  if (!confirm('Yakin ingin menghapus peralatan ini?')) return;
+  try { await api('/alat/' + id, {method: 'DELETE'}); await loadAlat(); alert('Peralatan berhasil dihapus.'); }
+  catch (e) { alert('Gagal menghapus peralatan: ' + e.message); }
 }
 
 /* PENYEWAAN */
-
 async function loadOrders() {
-    setError('order-error', '');
-
-    const body = document.getElementById('order-body');
-    body.innerHTML = '<tr><td colspan="7">Memuat...</td></tr>';
-
-    try {
-        orderData = arr(await api('/pemesanan'));
-        renderOrders();
-    } catch (e) {
-        body.innerHTML =
-            '<tr><td colspan="7">Data pesanan gagal dimuat.</td></tr>';
-
-        setError('order-error', e.message);
-    }
+  setError('order-error', '');
+  $('order-body').innerHTML = '<tr><td colspan="7">Memuat...</td></tr>';
+  try { orderData = arr(await api('/pemesanan')); renderOrders(); }
+  catch (e) {
+    $('order-body').innerHTML = '<tr><td colspan="7">Data pesanan gagal dimuat.</td></tr>';
+    setError('order-error', e.message);
+  }
 }
 
 function renderOrders() {
-    const getStatus = o => o.status_pemesanan || '-';
+  const getStatus = o => o.status_pemesanan || '-';
+  $('order-body').innerHTML = orderData.length ? orderData.map(o => {
+    const id = Number(o.id_pemesanan ?? o.id);
+    const validId = Number.isInteger(id) && id > 0;
+    const waiting = low(getStatus(o)) === 'menunggu';
+    return `
+      <tr>
+        <td>${esc(validId ? id : 'ID tidak valid')}</td>
+        <td>${esc(o.nama_penyewa || o.nama || o.id_user || '-')}</td>
+        <td>${esc(o.tanggal_sewa || '-')}</td>
+        <td>${esc(o.tanggal_kembali_rencana || '-')}</td>
+        <td>${rupiah(o.total_harga)}</td>
+        <td>${statusBadge(getStatus(o))}</td>
+        <td>${waiting && validId ? `
+          <button class="btn btn-green" onclick="ubahStatusPesanan(${id},'disetujui')">ACC</button>
+          <button class="btn btn-red" onclick="ubahStatusPesanan(${id},'ditolak')">Tolak</button>` : '-'}</td>
+      </tr>`;
+  }).join('') : '<tr><td colspan="7" class="empty">Belum ada pesanan.</td></tr>';
 
-    document.getElementById('order-body').innerHTML = orderData.length
-        ? orderData.map(o => {
-            const id = Number(o.id_pemesanan ?? o.id);
-            const validId = Number.isInteger(id) && id > 0;
-            const waiting = String(getStatus(o)).toLowerCase() === 'menunggu';
-
-            return `
-                <tr>
-                    <td>${esc(validId ? id : 'ID tidak valid')}</td>
-                    <td>${esc(o.nama_penyewa || o.nama || o.id_user || '-')}</td>
-                    <td>${esc(o.tanggal_sewa || '-')}</td>
-                    <td>${esc(o.tanggal_kembali_rencana || '-')}</td>
-                    <td>${rupiah(o.total_harga)}</td>
-                    <td><span class="status">${esc(getStatus(o))}</span></td>
-                    <td>
-                        ${
-                            waiting && validId
-                            ? `
-                                <button class="btn btn-green"
-                                    onclick="ubahStatusPesanan(${id},'disetujui')">
-                                    ACC
-                                </button>
-                                <button class="btn btn-red"
-                                    onclick="ubahStatusPesanan(${id},'ditolak')">
-                                    Tolak
-                                </button>
-                            `
-                            : '-'
-                        }
-                    </td>
-                </tr>
-            `;
-        }).join('')
-        : '<tr><td colspan="7" class="empty">Belum ada pesanan.</td></tr>';
-
-    document.getElementById('stat-order').textContent = orderData.length;
-
-    document.getElementById('stat-wait').textContent =
-        orderData.filter(o =>
-            String(getStatus(o)).toLowerCase() === 'menunggu'
-        ).length;
-
-    document.getElementById('report-order').textContent = orderData.length;
-
-    document.getElementById('report-total').textContent = rupiah(
-        orderData.reduce((sum, o) => sum + Number(o.total_harga || 0), 0)
-    );
-
-    document.getElementById('recent-body').innerHTML =
-        orderData.slice(0, 5).map(o => `
-            <tr>
-                <td>${esc(o.id_pemesanan ?? o.id)}</td>
-                <td>${esc(o.nama_penyewa || o.nama || o.id_user || '-')}</td>
-                <td>${esc(o.tanggal_sewa || '-')}</td>
-                <td>${rupiah(o.total_harga)}</td>
-                <td><span class="status">${esc(getStatus(o))}</span></td>
-            </tr>
-        `).join('') ||
-        '<tr><td colspan="5" class="empty">Belum ada pesanan.</td></tr>';
+  $('stat-order').textContent = orderData.length;
+  $('stat-wait').textContent = orderData.filter(o => low(getStatus(o)) === 'menunggu').length;
+  $('report-order').textContent = orderData.length;
+  $('report-total').textContent = rupiah(orderData.reduce((s, o) => s + Number(o.total_harga || 0), 0));
+  $('recent-body').innerHTML = orderData.slice(0, 5).map(o => `
+    <tr>
+      <td>${esc(o.id_pemesanan ?? o.id)}</td>
+      <td>${esc(o.nama_penyewa || o.nama || o.id_user || '-')}</td>
+      <td>${esc(o.tanggal_sewa || '-')}</td>
+      <td>${rupiah(o.total_harga)}</td>
+      <td>${statusBadge(getStatus(o))}</td>
+    </tr>`).join('') || '<tr><td colspan="5" class="empty">Belum ada pesanan.</td></tr>';
 }
 
 async function ubahStatusPesanan(id, statusBaru) {
-    id = Number(id);
-
-    if (!Number.isInteger(id) || id < 1) {
-        alert('ID pesanan tidak valid. Muat ulang data.');
-        return;
-    }
-
-    if (!['disetujui', 'ditolak'].includes(statusBaru)) {
-        alert('Status tidak valid.');
-        return;
-    }
-
-    const kata = statusBaru === 'disetujui' ? 'menyetujui' : 'menolak';
-
-    if (!confirm(`Yakin ingin ${kata} pesanan ID ${id}?`)) return;
-
-    setError('order-error', '');
-
-    try {
-        await api(`/pemesanan/${encodeURIComponent(id)}/status`, {
-            method: 'PATCH',
-            body: JSON.stringify({ status: statusBaru })
-        });
-
-        await loadOrders();
-
-        alert(
-            statusBaru === 'disetujui'
-                ? 'Pesanan berhasil disetujui.'
-                : 'Pesanan berhasil ditolak.'
-        );
-    } catch (e) {
-        setError('order-error', e.message);
-        alert('Gagal mengubah status pesanan: ' + e.message);
-    }
+  id = Number(id);
+  if (!Number.isInteger(id) || id < 1) return alert('ID pesanan tidak valid. Muat ulang data.');
+  if (!['disetujui', 'ditolak'].includes(statusBaru)) return alert('Status tidak valid.');
+  if (!confirm(`Yakin ingin ${statusBaru === 'disetujui' ? 'menyetujui' : 'menolak'} pesanan ID ${id}?`)) return;
+  setError('order-error', '');
+  try {
+    await api(`/pemesanan/${encodeURIComponent(id)}/status`, {method: 'PATCH', body: JSON.stringify({status: statusBaru})});
+    await loadOrders();
+    alert(statusBaru === 'disetujui' ? 'Pesanan berhasil disetujui.' : 'Pesanan berhasil ditolak.');
+  } catch (e) { setError('order-error', e.message); alert('Gagal mengubah status pesanan: ' + e.message); }
 }
 
 /* PEMBAYARAN */
+const buktiUrl = p => { const path = String(p.bukti_bayar || '').replace(/^\/+/, ''); return path ? '/' + path : ''; };
+const payById = id => paymentData.find(p => Number(p.id_pembayaran) === Number(id));
 
 async function loadPayments() {
-    setError('pay-error', '');
+  setError('pay-error', '');
+  $('pay-body').innerHTML = '<tr><td colspan="7">Memuat...</td></tr>';
+  $('hist-body').innerHTML = '<tr><td colspan="8">Memuat...</td></tr>';
+  try {
+    if (!orderData.length) { try { orderData = arr(await api('/pemesanan')); } catch {} }
+    paymentData = arr(await api('/pembayaran'));
+    renderPayments();
+  } catch (e) {
+    $('pay-body').innerHTML = '<tr><td colspan="7">Data pembayaran gagal dimuat.</td></tr>';
+    $('hist-body').innerHTML = '<tr><td colspan="8">Data pembayaran gagal dimuat.</td></tr>';
+    setError('pay-error', e.message);
+  }
+}
 
-    const body = document.getElementById('pay-body');
-    body.innerHTML = '<tr><td colspan="8">Memuat...</td></tr>';
-
-    try {
-        paymentData = arr(await api('/pembayaran'));
-        renderPayments();
-    } catch (e) {
-        body.innerHTML =
-            '<tr><td colspan="8">Data pembayaran gagal dimuat.</td></tr>';
-
-        setError('pay-error', e.message);
-    }
+function buktiBtn(p) {
+  return buktiUrl(p)
+    ? `<button class="btn btn-blue" onclick="lihatBukti(${Number(p.id_pembayaran)})"><i class="fa-solid fa-image"></i> Lihat Bukti</button>`
+    : '<span class="hint">Belum ada bukti</span>';
 }
 
 function renderPayments() {
-    document.getElementById('stat-pay').textContent =
-        paymentData.filter(p =>
-            String(p.status_pembayaran || '').toLowerCase() === 'menunggu'
-        ).length;
+  const nama = p => p.nama_penyewa || namaPesanan(p.id_pemesanan);
+  const waiting = paymentData.filter(p => low(p.status_pembayaran) === 'menunggu');
+  const done = paymentData.filter(p => low(p.status_pembayaran) !== 'menunggu');
+  const q = low($('search-hist').value);
+  const hist = done.filter(p => low(nama(p)).includes(q));
 
-    document.getElementById('report-paid').textContent =
-        paymentData.filter(p =>
-            String(p.status_pembayaran || '').toLowerCase() === 'berhasil'
-        ).length;
+  $('stat-pay').textContent = waiting.length;
+  $('report-paid').textContent = paymentData.filter(p => low(p.status_pembayaran) === 'berhasil').length;
 
-    document.getElementById('pay-body').innerHTML = paymentData.length
-        ? paymentData.map(p => {
-            const path = String(p.bukti_bayar || '').replace(/^\/+/, '');
+  $('pay-body').innerHTML = waiting.length ? waiting.map(p => `
+    <tr>
+      <td>${esc(p.id_pembayaran)}</td><td>${esc(p.id_pemesanan)}</td><td>${esc(nama(p))}</td>
+      <td>${rupiah(p.jumlah_bayar)}</td><td>${esc(p.metode_pembayaran || '-')}</td>
+      <td>${buktiBtn(p)}</td>
+      <td>
+        <button class="btn btn-green" onclick="verifBayar(${Number(p.id_pembayaran)},'berhasil')"><i class="fa-solid fa-check"></i> Verifikasi</button>
+        <button class="btn btn-red" onclick="verifBayar(${Number(p.id_pembayaran)},'ditolak')"><i class="fa-solid fa-xmark"></i> Tolak</button>
+      </td>
+    </tr>`).join('') : '<tr><td colspan="7" class="empty">Tidak ada pembayaran yang menunggu verifikasi.</td></tr>';
 
-            const bukti = path
-                ? `<a href="/${esc(path)}" target="_blank" rel="noopener">Lihat bukti</a>`
-                : '-';
-
-            const menunggu =
-                String(p.status_pembayaran || '').toLowerCase() === 'menunggu';
-
-            return `
-                <tr>
-                    <td>${esc(p.id_pembayaran)}</td>
-                    <td>${esc(p.id_pemesanan)}</td>
-                    <td>${esc(p.nama_penyewa || '-')}</td>
-                    <td>${rupiah(p.jumlah_bayar)}</td>
-                    <td>${esc(p.metode_pembayaran || '-')}</td>
-                    <td>${bukti}</td>
-                    <td><span class="status">${esc(p.status_pembayaran || '-')}</span></td>
-                    <td>
-                        ${
-                            menunggu
-                            ? `
-                                <button class="btn btn-green"
-                                    onclick="verifBayar(${Number(p.id_pembayaran)},'berhasil')">
-                                    Terima
-                                </button>
-                                <button class="btn btn-red"
-                                    onclick="verifBayar(${Number(p.id_pembayaran)},'ditolak')">
-                                    Tolak
-                                </button>
-                            `
-                            : '-'
-                        }
-                    </td>
-                </tr>
-            `;
-        }).join('')
-        : '<tr><td colspan="8" class="empty">Belum ada pembayaran.</td></tr>';
+  $('hist-body').innerHTML = hist.length ? hist.map(p => `
+    <tr>
+      <td>${esc(p.id_pembayaran)}</td><td>${esc(p.id_pemesanan)}</td><td>${esc(nama(p))}</td>
+      <td>${rupiah(p.jumlah_bayar)}</td><td>${esc(p.metode_pembayaran || '-')}</td>
+      <td>${esc(p.tanggal_pembayaran || p.tanggal_bayar || p.created_at || '-')}</td>
+      <td>${statusBadge(p.status_pembayaran)}</td>
+      <td>${buktiBtn(p)}</td>
+    </tr>`).join('') : '<tr><td colspan="8" class="empty">Belum ada riwayat pembayaran.</td></tr>';
 }
+$('search-hist').addEventListener('input', renderPayments);
+
+function lihatBukti(id) {
+  const p = payById(id);
+  if (!p) return;
+  const url = buktiUrl(p);
+  const isPdf = /\.pdf($|\?)/i.test(url);
+  $('bukti-info').innerHTML = `
+    <div><span>Pelanggan</span><br><b>${esc(p.nama_penyewa || namaPesanan(p.id_pemesanan))}</b></div>
+    <div><span>ID Pesanan</span><br><b>${esc(p.id_pemesanan)}</b></div>
+    <div><span>Jumlah</span><br><b>${rupiah(p.jumlah_bayar)}</b></div>
+    <div><span>Status</span><br>${statusBadge(p.status_pembayaran)}</div>`;
+  $('bukti-view').innerHTML = isPdf
+    ? `<iframe src="${esc(url)}"></iframe>`
+    : `<img src="${esc(url)}" alt="Bukti pembayaran" onerror="this.outerHTML='<p class=&quot;hint&quot;>Gambar tidak dapat dimuat. <a href=&quot;${esc(url)}&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;>Buka di tab baru</a></p>'">`;
+  const menunggu = low(p.status_pembayaran) === 'menunggu';
+  $('bukti-actions').innerHTML = `
+    <a class="btn btn-gray" href="${esc(url)}" target="_blank" rel="noopener"><i class="fa-solid fa-up-right-from-square"></i> Buka di tab baru</a>
+    ${menunggu ? `
+      <button class="btn btn-green" onclick="verifBayar(${Number(p.id_pembayaran)},'berhasil')"><i class="fa-solid fa-check"></i> Verifikasi</button>
+      <button class="btn btn-red" onclick="verifBayar(${Number(p.id_pembayaran)},'ditolak')"><i class="fa-solid fa-xmark"></i> Tolak</button>` : ''}
+    <button class="btn btn-gray" onclick="tutupBukti()">Tutup</button>`;
+  $('bukti-modal').classList.add('show');
+}
+const tutupBukti = () => { $('bukti-modal').classList.remove('show'); $('bukti-view').innerHTML = ''; };
+$('bukti-modal').addEventListener('click', e => { if (e.target.id === 'bukti-modal') tutupBukti(); });
 
 async function verifBayar(id, status) {
-    if (!confirm(`Yakin mengubah status pembayaran ID ${id}?`)) return;
-
-    try {
-        await api(`/pembayaran/${id}/verifikasi`, {
-            method: 'PATCH',
-            body: JSON.stringify({ status })
-        });
-
-        await Promise.all([loadPayments(), loadOrders()]);
-        alert('Pembayaran berhasil diverifikasi.');
-    } catch (e) {
-        setError('pay-error', e.message);
-        alert('Verifikasi gagal: ' + e.message);
-    }
+  const kata = status === 'berhasil' ? 'memverifikasi' : 'menolak';
+  if (!confirm(`Yakin ingin ${kata} pembayaran ID ${id}?`)) return;
+  try {
+    await api(`/pembayaran/${id}/verifikasi`, {method: 'PATCH', body: JSON.stringify({status})});
+    tutupBukti();
+    await Promise.all([loadPayments(), loadOrders()]);
+    alert(status === 'berhasil' ? 'Pembayaran berhasil diverifikasi.' : 'Pembayaran ditolak.');
+  } catch (e) { setError('pay-error', e.message); alert('Gagal memproses pembayaran: ' + e.message); }
 }
 
 /* PENGEMBALIAN */
+$('return-order-id').addEventListener('input', () => {
+  const v = $('return-order-id').value.trim();
+  const n = v ? namaPesanan(v) : '';
+  $('return-name').textContent = v ? (n !== '-' ? 'Pelanggan: ' + n : 'Pesanan tidak ditemukan di data yang dimuat.') : '';
+});
 
 async function serahkanAlat() {
-    const id = document.getElementById('return-order-id').value.trim();
-
-    if (!id || !Number.isInteger(Number(id)) || Number(id) < 1) {
-        alert('Masukkan ID pemesanan yang valid.');
-        return;
-    }
-
-    const btn = document.getElementById('btn-serahkan');
-    btn.disabled = true;
-
-    try {
-        await api(`/pengembalian/${encodeURIComponent(id)}/serahkan`, {
-            method: 'PATCH'
-        });
-
-        alert('Alat berhasil diserahkan.');
-        await loadOrders();
-    } catch (e) {
-        alert('Gagal menyerahkan alat: ' + e.message);
-    } finally {
-        btn.disabled = false;
-    }
+  const id = $('return-order-id').value.trim();
+  if (!id || !Number.isInteger(Number(id)) || Number(id) < 1) return alert('Masukkan ID pemesanan yang valid.');
+  const btn = $('btn-serahkan');
+  btn.disabled = true;
+  try {
+    await api(`/pengembalian/${encodeURIComponent(id)}/serahkan`, {method: 'PATCH'});
+    alert('Alat berhasil diserahkan.');
+    await loadOrders();
+  } catch (e) { alert('Gagal menyerahkan alat: ' + e.message); }
+  finally { btn.disabled = false; }
 }
 
 async function catatPengembalian() {
-    if (busyReturn) return;
-
-    const id = document.getElementById('return-order-id').value.trim();
-    const dendaInput = document.getElementById('return-fine').value;
-    const denda = Number(dendaInput);
-
-    if (!id || !Number.isInteger(Number(id)) || Number(id) < 1) {
-        alert('Masukkan ID pemesanan yang valid.');
-        return;
-    }
-
-    if (dendaInput === '' || !Number.isFinite(denda) || denda < 0) {
-        alert('Masukkan denda yang valid.');
-        return;
-    }
-
-    const payload = {
-        kondisi_alat: document.getElementById('return-condition').value,
-        denda,
-        catatan: document.getElementById('return-note').value.trim()
-    };
-
-    busyReturn = true;
-    document.getElementById('btn-catat-return').disabled = true;
-    setError('return-action-error', '');
-
-    try {
-        await api(`/pengembalian/${encodeURIComponent(id)}`, {
-            method: 'POST',
-            body: JSON.stringify(payload)
-        });
-
-        alert('Pengembalian berhasil dicatat.');
-
-        document.getElementById('return-order-id').value = '';
-        document.getElementById('return-fine').value = '0';
-        document.getElementById('return-note').value = '';
-
-        await Promise.all([loadOrders(), loadReturns()]);
-    } catch (e) {
-        setError('return-action-error', e.message);
-        alert('Gagal mencatat pengembalian: ' + e.message);
-    } finally {
-        busyReturn = false;
-        document.getElementById('btn-catat-return').disabled = false;
-    }
+  if (busyReturn) return;
+  const id = $('return-order-id').value.trim();
+  const dendaInput = $('return-fine').value;
+  const denda = Number(dendaInput);
+  if (!id || !Number.isInteger(Number(id)) || Number(id) < 1) return alert('Masukkan ID pemesanan yang valid.');
+  if (dendaInput === '' || !Number.isFinite(denda) || denda < 0) return alert('Masukkan denda yang valid.');
+  const payload = {kondisi_alat: $('return-condition').value, denda, catatan: $('return-note').value.trim()};
+  busyReturn = true;
+  $('btn-catat-return').disabled = true;
+  setError('return-action-error', '');
+  try {
+    await api(`/pengembalian/${encodeURIComponent(id)}`, {method: 'POST', body: JSON.stringify(payload)});
+    alert('Pengembalian berhasil dicatat.');
+    $('return-order-id').value = ''; $('return-fine').value = '0'; $('return-note').value = ''; $('return-name').textContent = '';
+    await loadOrders();
+    await loadReturns();
+  } catch (e) { setError('return-action-error', e.message); alert('Gagal mencatat pengembalian: ' + e.message); }
+  finally { busyReturn = false; $('btn-catat-return').disabled = false; }
 }
 
 async function loadReturns() {
-    document.getElementById('return-error').textContent =
-        'Endpoint daftar pengembalian belum disambungkan.';
-
-    document.getElementById('return-body').innerHTML =
-        '<tr><td colspan="7" class="empty">Riwayat belum tersedia.</td></tr>';
+  $('return-error').textContent = '';
+  $('return-body').innerHTML = '<tr><td colspan="8">Memuat...</td></tr>';
+  try {
+    if (!orderData.length) { try { orderData = arr(await api('/pemesanan')); } catch {} }
+    const rows = arr(await api('/pengembalian'));
+    $('return-body').innerHTML = rows.length ? rows.map(r => `
+      <tr>
+        <td>${esc(r.id_pengembalian ?? r.id)}</td>
+        <td>${esc(r.id_pemesanan)}</td>
+        <td>${esc(r.nama_penyewa || namaPesanan(r.id_pemesanan))}</td>
+        <td>${esc(r.tanggal_kembali_aktual || r.tanggal_pengembalian || '-')}</td>
+        <td>${esc(r.hari_terlambat ?? r.keterlambatan ?? 0)} hari</td>
+        <td>${rupiah(r.denda)}</td>
+        <td>${statusBadge(String(r.kondisi_alat || '-').replace('_', ' '))}</td>
+        <td>${esc(r.catatan || '-')}</td>
+      </tr>`).join('') : '<tr><td colspan="8" class="empty">Belum ada riwayat pengembalian.</td></tr>';
+  } catch (e) {
+    $('return-body').innerHTML = '<tr><td colspan="8" class="empty">Riwayat pengembalian belum tersedia.</td></tr>';
+    $('return-error').textContent = 'Gagal memuat riwayat: ' + e.message + ' (pastikan backend punya GET /api/pengembalian).';
+  }
 }
 
-/* RIWAYAT KTP */
+let ktpWait = [], ktpHist = [], ktpBlobUrl = null;
 
-const KTP_ENDPOINTS = [
-    '/admin/pelanggan',
-    '/pelanggan',
-    '/admin/users',
-    '/users'
-];
-
-async function ambilDataPelanggan() {
-    let lastErr;
-
-    for (const ep of KTP_ENDPOINTS) {
-        try {
-            return arr(await api(ep));
-        } catch (e) {
-            lastErr = e;
-        }
-    }
-
-    throw new Error(
-        'Jalur daftar pelanggan belum ada di backend. ' +
-        (lastErr ? lastErr.message : '')
-    );
-}
+const ktpStat = u => low(u.status_verifikasi_ktp);
+const ktpBadge = s => `<span class="status ${s === 'disetujui' ? '' : esc(s)}">${esc(s)}</span>`;
+const ktpTgl = v => v ? new Date(v).toLocaleString('id-ID', {day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'}) : '-';
+const ktpFotoBtn = u => `<button class="btn btn-blue" onclick="lihatKtp(${Number(u.id_user)})"><i class="fa-solid fa-id-card"></i> Lihat KTP</button>`;
 
 async function loadKtp() {
-    setError('ktp-error', '');
-
-    const body = document.getElementById('ktp-body');
-    body.innerHTML = '<tr><td colspan="5">Memuat...</td></tr>';
-
+  setError('ktp-error', '');
+  $('ktp-wait-body').innerHTML = '<tr><td colspan="6">Memuat...</td></tr>';
+  $('ktp-hist-body').innerHTML = '<tr><td colspan="7">Memuat...</td></tr>';
+  try {
+    let salah = '';
     try {
-        const data = await ambilDataPelanggan();
-
-        const riwayat = data.filter(p => {
-            const s = String(p.status_verifikasi_ktp || '').toLowerCase();
-            return s === 'disetujui' || s === 'ditolak';
-        });
-
-        body.innerHTML = riwayat.length
-            ? riwayat.map(p => `
-                <tr>
-                    <td>${esc(p.nama)}</td>
-                    <td>${esc(p.email)}</td>
-                    <td>${esc(p.nomor_ktp || '-')}</td>
-                    <td>${
-                        p.foto_ktp
-                        ? `<a href="/uploads/${esc(p.foto_ktp)}" target="_blank" rel="noopener">Lihat</a>`
-                        : '-'
-                    }</td>
-                    <td><span class="status">${esc(p.status_verifikasi_ktp)}</span></td>
-                </tr>
-            `).join('')
-            : '<tr><td colspan="5" class="empty">Belum ada riwayat verifikasi.</td></tr>';
-    } catch (e) {
-        body.innerHTML = '<tr><td colspan="5">Riwayat gagal dimuat.</td></tr>';
-        setError('ktp-error', e.message);
+      [ktpWait, ktpHist] = await Promise.all([api('/ktp'), api('/ktp/riwayat')]).then(r => r.map(arr));
+    } catch (e1) {
+      // cadangan: pakai route /api/pelanggan yang sudah ada, lalu pisah berdasarkan status
+      salah = '/api/ktp belum aktif (' + e1.message + '), memakai /api/pelanggan. Restart server & pastikan ktp.routes.js sudah diganti.';
+      const all = arr(await api('/pelanggan'));
+      ktpWait = all.filter(u => ktpStat(u) === 'menunggu');
+      ktpHist = all.filter(u => ['disetujui', 'ditolak'].includes(ktpStat(u)));
     }
+    renderKtp();
+    if (salah) console.warn(salah);
+  } catch (e) {
+    setError('ktp-error', e.message);
+  }
+}
+
+function renderKtp() {
+  $('ktp-wait-body').innerHTML = ktpWait.length ? ktpWait.map(u => `<tr>
+      <td>${esc(u.nama)}</td><td>${esc(u.email)}</td><td>${esc(u.nomor_ktp || '-')}</td>
+      <td>${ktpFotoBtn(u)}</td><td>${ktpBadge('menunggu')}</td>
+      <td>
+        <button class="btn btn-green" onclick="ubahKtp(${Number(u.id_user)},'disetujui')"><i class="fa-solid fa-check"></i> Verifikasi</button>
+        <button class="btn btn-red" onclick="ubahKtp(${Number(u.id_user)},'ditolak')"><i class="fa-solid fa-xmark"></i> Tolak</button>
+      </td></tr>`).join('')
+    : '<tr><td colspan="6" class="empty">Tidak ada KTP yang menunggu verifikasi.</td></tr>';
+
+  const q = low($('ktp-search').value), f = $('ktp-filter').value;
+  const rows = ktpHist.filter(u => low(`${u.nama || ''} ${u.email || ''}`).includes(q) && (!f || ktpStat(u) === f));
+  $('ktp-hist-body').innerHTML = rows.length ? rows.map(u => `<tr>
+      <td>${esc(u.nama)}</td><td>${esc(u.email)}</td><td>${esc(u.nomor_ktp || '-')}</td>
+      <td>${ktpFotoBtn(u)}</td><td>${ktpBadge(ktpStat(u))}</td>
+      <td>${esc(u.diverifikasi_oleh || '-')}</td><td>${esc(ktpTgl(u.tanggal_verifikasi))}</td></tr>`).join('')
+    : '<tr><td colspan="7" class="empty">Belum ada riwayat verifikasi.</td></tr>';
+}
+$('ktp-search').addEventListener('input', renderKtp);
+$('ktp-filter').addEventListener('change', renderKtp);
+
+async function lihatKtp(id) {
+  const u = [...ktpWait, ...ktpHist].find(x => Number(x.id_user) === Number(id));
+  if (!u) return;
+  const s = ktpStat(u);
+  $('ktp-info').innerHTML = `
+    <div><span>Nama</span><br><b>${esc(u.nama)}</b></div>
+    <div><span>Email</span><br><b>${esc(u.email)}</b></div>
+    <div><span>Nomor KTP</span><br><b>${esc(u.nomor_ktp || '-')}</b></div>
+    <div><span>Status</span><br>${ktpBadge(s)}</div>`;
+  $('ktp-view').innerHTML = '<p class="hint">Memuat foto KTP...</p>';
+  $('ktp-actions').innerHTML = '';
+  $('ktp-modal').classList.add('show');
+
+  let aksi = '';
+  try {
+    // foto KTP privat -> harus diambil dengan token, lalu ditampilkan sebagai blob
+    const res = await fetch(`${API}/ktp/${encodeURIComponent(id)}/foto`, {headers: {Authorization: 'Bearer ' + token()}});
+    if (!res.ok) throw new Error('Foto KTP tidak tersedia (' + res.status + ')');
+    ktpBlobUrl = URL.createObjectURL(await res.blob());
+    $('ktp-view').innerHTML = `<img src="${ktpBlobUrl}" alt="Foto KTP">`;
+    aksi += `<a class="btn btn-gray" href="${ktpBlobUrl}" target="_blank" rel="noopener">Buka di tab baru</a>`;
+  } catch (e) {
+    $('ktp-view').innerHTML = `<div class="error">${esc(e.message)}</div>`;
+  }
+  if (s === 'menunggu') aksi += `
+    <button class="btn btn-green" onclick="ubahKtp(${Number(id)},'disetujui')">Verifikasi</button>
+    <button class="btn btn-red" onclick="ubahKtp(${Number(id)},'ditolak')">Tolak</button>`;
+  $('ktp-actions').innerHTML = aksi + '<button class="btn btn-gray" onclick="tutupKtp()">Tutup</button>';
+}
+function tutupKtp() {
+  $('ktp-modal').classList.remove('show');
+  $('ktp-view').innerHTML = '';
+  if (ktpBlobUrl) { URL.revokeObjectURL(ktpBlobUrl); ktpBlobUrl = null; }
+}
+$('ktp-modal').addEventListener('click', e => { if (e.target.id === 'ktp-modal') tutupKtp(); });
+
+async function ubahKtp(id, status) {
+  if (!confirm(`Yakin ingin ${status === 'disetujui' ? 'memverifikasi' : 'menolak'} KTP ini?`)) return;
+  try {
+    await api(`/ktp/${encodeURIComponent(id)}/verifikasi`, {method: 'PATCH', body: JSON.stringify({status})});
+    tutupKtp();
+    await loadKtp();
+  } catch (e) { setError('ktp-error', e.message); alert('Gagal: ' + e.message); }
 }
 
 /* DASHBOARD */
-
 async function loadAll() {
-    await Promise.all([
-        loadAlat(),
-        loadOrders(),
-        loadPayments()
-    ]);
+  await loadOrders();
+  await Promise.all([loadAlat(), loadPayments()]);
 }
 
-if (ensureAdmin()) {
-    loadAll();
-}
+if (ensureAdmin()) loadAll();
 </script>
-
 </body>
 </html>

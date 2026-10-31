@@ -111,7 +111,12 @@ exports.detail = async (req, res) => {
   try {
     const [[p]] = await db.query('SELECT * FROM pemesanan WHERE id_pemesanan = ?', [req.params.id]);
     if (!p) return fail(res, 'Pesanan tidak ditemukan', 404);
-    if (req.user.role !== 'admin' && p.id_user !== req.user.id) return fail(res, 'Bukan pesanan kamu', 403);
+    if (
+  !['admin', 'manager'].includes(req.user.role) &&
+  p.id_user !== req.user.id
+) {
+  return fail(res, 'Bukan pesanan kamu', 403);
+}
     const [items] = await db.query(
       `SELECT k.*, a.nama_alat FROM keranjang_detail k JOIN alat a ON a.id_alat = k.id_alat
        WHERE k.id_pemesanan = ?`, [p.id_pemesanan]);

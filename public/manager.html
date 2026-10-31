@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -31,12 +30,12 @@ button{cursor:pointer}
 .top-navbar p{margin:3px 0 0;color:var(--muted);font-size:11px}
 .navbar-right{display:flex;align-items:center;justify-content:flex-end;gap:10px;margin-left:auto;flex-shrink:0}
 .navbar-role{background:var(--light);color:var(--green);padding:9px 12px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap}
-#logout-navbar{display:inline-flex!important;visibility:visible!important;opacity:1!important;white-space:nowrap;align-items:center;justify-content:center}
-.page{display:none}.page.active{display:block}
+.page{display:none}
+.page.active{display:block}
 .page-heading{background:white;border:1px solid var(--border);border-radius:15px;padding:22px;margin-bottom:20px}
 .page-heading h1{font-size:23px;color:var(--dark);margin:0 0 6px}
 .page-heading p{margin:0;color:var(--muted);line-height:1.7}
-.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:20px}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:20px}
 .stat-card,.panel{background:#fff;border:1px solid var(--border);border-radius:15px}
 .stat-card{padding:18px;min-width:0}
 .stat-icon{height:42px;width:42px;border-radius:12px;background:var(--light);color:var(--green);display:grid;place-items:center;font-size:18px}
@@ -47,7 +46,11 @@ button{cursor:pointer}
 .panel-header h2,.panel h2{font-size:16px;color:var(--dark);margin:0}
 .btn{border:0;border-radius:9px;padding:10px 13px;display:inline-flex;align-items:center;justify-content:center;gap:7px;font-size:11px;font-weight:700;color:white;margin:2px}
 .btn:disabled{opacity:.55;cursor:not-allowed}
-.btn-green{background:var(--green)}.btn-red{background:#dc3333}.btn-blue{background:#3478db}.btn-yellow{background:#e9a11a;color:#fff}.btn-gray{background:#64748b}
+.btn-green{background:var(--green)}
+.btn-red{background:#dc3333}
+.btn-blue{background:#3478db}
+.btn-yellow{background:#e9a11a;color:#fff}
+.btn-gray{background:#64748b}
 .field{width:100%;padding:10px 12px;border:1px solid #dbe5db;border-radius:9px;background:#fff;color:var(--text);outline:none;font-size:12px}
 .field:focus{border-color:var(--green);box-shadow:0 0 0 2px #32883d1c}
 .search{max-width:290px}
@@ -59,18 +62,16 @@ td{padding:12px;border-bottom:1px solid var(--border);font-size:12px;vertical-al
 .empty{text-align:center;color:var(--muted);padding:24px}
 .hint{font-size:11px;color:var(--muted);line-height:1.8}
 .error{background:#fff0ee;color:#b42318;padding:11px;border-radius:9px;margin:10px 0;overflow-wrap:anywhere}
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.form-group{margin-bottom:13px;min-width:0}
-.form-group label{display:block;font-size:11px;font-weight:600;margin-bottom:6px}
-.form-group.full{grid-column:1/-1}
-.actions{display:flex;flex-wrap:wrap;gap:4px}
-.modal{display:none;position:fixed;inset:0;background:#0008;z-index:30;align-items:center;justify-content:center;padding:15px}
-.modal.show{display:flex}
-.modal-box{width:100%;max-width:560px;max-height:90vh;overflow-y:auto;background:white;padding:23px;border-radius:16px}
-.modal-box h2{color:var(--dark);margin:0 0 18px}
 .notice{background:#f0f8f0;border:1px solid var(--border);border-radius:10px;padding:13px;line-height:1.8;margin-bottom:15px}
+.actions{display:flex;flex-wrap:wrap;gap:4px}
 a{color:var(--green)}
-@media(max-width:1100px){.sidebar{width:225px;padding:15px}.content{margin-left:225px;padding:15px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.modal{display:none;position:fixed;inset:0;background:#0008;z-index:30;align-items:center;justify-content:center;padding:15px}
+.modal-box{width:100%;max-width:620px;max-height:90vh;overflow-y:auto;background:white;padding:23px;border-radius:16px}
+@media(max-width:1100px){
+.sidebar{width:225px;padding:15px}
+.content{margin-left:225px;padding:15px}
+.stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
 @media(max-width:650px){
 .sidebar{position:relative;width:100%;height:auto;padding:15px}
 .logo-box{padding:18px;margin-bottom:20px}
@@ -91,14 +92,20 @@ a{color:var(--green)}
 .page-heading{padding:17px}
 .page-heading h1{font-size:20px}
 .panel{padding:14px}
-.form-grid{grid-template-columns:1fr}
-.form-group.full{grid-column:auto}
 .search{max-width:100%;width:100%}
+}
+@media print{
+.sidebar,.top-navbar,.no-print,.btn{display:none!important}
+.content{margin:0;padding:0;max-width:none}
+.page{display:none!important}
+#page-laporan{display:block!important}
+.panel,.page-heading,.stat-card{break-inside:avoid}
 }
 </style>
 </head>
 
 <body>
+
 <aside class="sidebar">
   <div class="logo-box">
     <div class="logo-icon"><i class="fa-solid fa-tent"></i></div>
@@ -107,9 +114,9 @@ a{color:var(--green)}
   </div>
 
   <div class="menu-title">MENU MANAGER</div>
+
   <nav class="menu-sidebar">
     <button class="active" data-page="dashboard"><i class="fa-solid fa-chart-line"></i>Dashboard Manager</button>
-    <button data-page="admin"><i class="fa-solid fa-user-shield"></i>Data Admin</button>
     <button data-page="penyewaan"><i class="fa-solid fa-file-lines"></i>Data Penyewaan</button>
     <button data-page="pengembalian"><i class="fa-solid fa-rotate-left"></i>Data Pengembalian</button>
     <button data-page="evaluasi"><i class="fa-solid fa-star"></i>Evaluasi Pelanggan</button>
@@ -125,631 +132,928 @@ a{color:var(--green)}
 </aside>
 
 <main class="content">
-  <nav class="top-navbar">
-    <div>
-      <h2 id="navbar-title">Dashboard Manager</h2>
-      <p>SISEPCAMP — Sistem Penyewaan Peralatan Camping</p>
+
+<nav class="top-navbar">
+  <div>
+    <h2 id="navbar-title">Dashboard Manager</h2>
+    <p>SISEPCAMP — Sistem Penyewaan Peralatan Camping</p>
+  </div>
+
+  <div class="navbar-right">
+    <span class="navbar-role"><i class="fa-solid fa-user-tie"></i> Manager</span>
+    <button type="button" class="btn btn-red" id="logout-navbar">
+      <i class="fa-solid fa-right-from-bracket"></i> Logout
+    </button>
+  </div>
+</nav>
+
+<!-- DASHBOARD -->
+<section class="page active" id="page-dashboard">
+  <div class="page-heading">
+    <h1>Dashboard Manager</h1>
+    <p id="welcome">Memuat ringkasan pengelolaan SISEPCAMP...</p>
+  </div>
+
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
+      <p>Total Pelanggan</p>
+      <h2 id="stat-pelanggan">—</h2>
     </div>
-    <div class="navbar-right">
-      <span class="navbar-role"><i class="fa-solid fa-user-tie"></i> Manager</span>
-      <button type="button" class="btn btn-red" id="logout-navbar">
-        <i class="fa-solid fa-right-from-bracket"></i> Logout
+
+    <div class="stat-card">
+      <div class="stat-icon"><i class="fa-solid fa-file-lines"></i></div>
+      <p>Total Penyewaan</p>
+      <h2 id="stat-order">—</h2>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon"><i class="fa-solid fa-rotate-left"></i></div>
+      <p>Total Pengembalian</p>
+      <h2 id="stat-return">—</h2>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">
+      <h2>Aktivitas Penyewaan Terbaru</h2>
+      <button class="btn btn-green no-print" onclick="loadAll()">
+        <i class="fa-solid fa-rotate"></i> Muat Ulang
       </button>
     </div>
-  </nav>
 
-  <!-- DASHBOARD MANAGER -->
-  <section class="page active" id="page-dashboard">
-    <div class="page-heading">
-      <h1>Dashboard Manager</h1>
-      <p id="welcome">Memuat ringkasan pengelolaan SISEPCAMP...</p>
+    <div id="dashboard-error"></div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ID Penyewaan</th>
+            <th>Pelanggan</th>
+            <th>Tanggal Sewa</th>
+            <th>Total</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="recent-body">
+          <tr><td colspan="5">Memuat data...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header"><h2>Akses Cepat Manager</h2></div>
+    <div class="actions no-print">
+      <button class="btn btn-blue" onclick="showPage('penyewaan')">
+        <i class="fa-solid fa-file-lines"></i> Lihat Penyewaan
+      </button>
+      <button class="btn btn-yellow" onclick="showPage('evaluasi')">
+        <i class="fa-solid fa-star"></i> Evaluasi Pelanggan
+      </button>
+      <button class="btn btn-gray" onclick="showPage('laporan')">
+        <i class="fa-solid fa-chart-pie"></i> Lihat Laporan
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- DATA PENYEWAAN -->
+<section class="page" id="page-penyewaan">
+  <div class="page-heading">
+    <h1>Data Penyewaan</h1>
+    <p>Pantau transaksi penyewaan dan status pesanan pelanggan. Manager hanya melihat data, sedangkan perubahan status dilakukan Admin.</p>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">
+      <h2>Semua Penyewaan</h2>
+      <button class="btn btn-green no-print" onclick="loadOrders()">
+        <i class="fa-solid fa-rotate"></i> Muat Ulang
+      </button>
     </div>
 
-    <div class="stats">
-      <div class="stat-card"><div class="stat-icon"><i class="fa-solid fa-users"></i></div><p>Total Pelanggan</p><h2 id="stat-pelanggan">—</h2></div>
-      <div class="stat-card"><div class="stat-icon"><i class="fa-solid fa-user-shield"></i></div><p>Total Admin</p><h2 id="stat-admin">—</h2></div>
-      <div class="stat-card"><div class="stat-icon"><i class="fa-solid fa-file-lines"></i></div><p>Total Penyewaan</p><h2 id="stat-order">—</h2></div>
-      <div class="stat-card"><div class="stat-icon"><i class="fa-solid fa-rotate-left"></i></div><p>Total Pengembalian</p><h2 id="stat-return">—</h2></div>
+    <div id="order-error"></div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Pelanggan</th>
+            <th>Tanggal Pesan</th>
+            <th>Tanggal Sewa</th>
+            <th>Tanggal Kembali</th>
+            <th>Total</th>
+            <th>Status</th>
+            <th>Detail</th>
+          </tr>
+        </thead>
+        <tbody id="order-body">
+          <tr><td colspan="8">Memuat data...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- DATA PENGEMBALIAN -->
+<section class="page" id="page-pengembalian">
+  <div class="page-heading">
+    <h1>Data Pengembalian</h1>
+    <p>Pantau pengembalian alat, kondisi barang, keterlambatan, dan denda. Pencatatan pengembalian dilakukan oleh Admin.</p>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">
+      <h2>Riwayat Pengembalian</h2>
+      <button class="btn btn-green no-print" onclick="loadReturns()">
+        <i class="fa-solid fa-rotate"></i> Muat Ulang
+      </button>
     </div>
 
-    <div class="panel">
-      <div class="panel-header">
-        <h2>Aktivitas Penyewaan Terbaru</h2>
-        <button class="btn btn-green" onclick="loadAll()"><i class="fa-solid fa-rotate"></i> Muat Ulang</button>
-      </div>
-      <div id="dashboard-error"></div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>ID Penyewaan</th><th>Pelanggan</th><th>Tanggal Sewa</th><th>Total</th><th>Status</th></tr></thead>
-          <tbody id="recent-body"><tr><td colspan="5">Memuat data...</td></tr></tbody>
-        </table>
-      </div>
+    <div id="return-error"></div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ID Pengembalian</th>
+            <th>ID Penyewaan</th>
+            <th>Tanggal Aktual</th>
+            <th>Terlambat</th>
+            <th>Denda</th>
+            <th>Kondisi</th>
+            <th>Catatan</th>
+          </tr>
+        </thead>
+        <tbody id="return-body">
+          <tr><td colspan="7">Memuat riwayat...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- EVALUASI -->
+<section class="page" id="page-evaluasi">
+  <div class="page-heading">
+    <h1>Evaluasi Pelanggan</h1>
+    <p>Tinjau ulasan, rating, dan masukan pelanggan tentang layanan SISEPCAMP.</p>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">
+      <h2>Ulasan Pelanggan</h2>
+      <button class="btn btn-green no-print" onclick="loadEvaluasi()">
+        <i class="fa-solid fa-rotate"></i> Muat Ulang
+      </button>
     </div>
 
-    <div class="panel">
-      <div class="panel-header"><h2>Akses Cepat Manager</h2></div>
+    <div id="evaluation-error"></div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ID Evaluasi</th>
+            <th>ID Penyewaan</th>
+            <th>Pelanggan</th>
+            <th>Rating</th>
+            <th>Ulasan</th>
+            <th>Tanggal</th>
+          </tr>
+        </thead>
+        <tbody id="evaluation-body">
+          <tr><td colspan="6">Memuat evaluasi...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- DATA PELANGGAN -->
+<section class="page" id="page-pelanggan">
+  <div class="page-heading">
+    <h1>Data Pelanggan</h1>
+    <p>Lihat informasi akun pelanggan yang terdaftar.</p>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">
+      <h2>Daftar Pelanggan</h2>
+
       <div class="actions">
-        <button class="btn btn-green" onclick="showPage('admin');openAdmin()"><i class="fa-solid fa-user-plus"></i> Tambah Admin</button>
-        <button class="btn btn-blue" onclick="showPage('penyewaan')"><i class="fa-solid fa-file-lines"></i> Lihat Penyewaan</button>
-        <button class="btn btn-yellow" onclick="showPage('evaluasi')"><i class="fa-solid fa-star"></i> Evaluasi Pelanggan</button>
-        <button class="btn btn-gray" onclick="showPage('laporan')"><i class="fa-solid fa-chart-pie"></i> Lihat Laporan</button>
+        <input class="field search" id="search-customer" placeholder="Cari nama atau email...">
+        <button class="btn btn-green no-print" onclick="loadPelanggan()">
+          <i class="fa-solid fa-rotate"></i> Muat Ulang
+        </button>
       </div>
     </div>
-  </section>
 
-  <!-- DATA ADMIN -->
-  <section class="page" id="page-admin">
-    <div class="page-heading">
-      <h1>Data Admin</h1>
-      <p>Kelola akun admin yang membantu operasional SISEPCAMP.</p>
-    </div>
-    <div class="panel">
-      <div class="panel-header">
-        <h2>Daftar Admin</h2>
-        <div class="actions">
-          <input class="field search" id="search-admin" placeholder="Cari nama atau email...">
-          <button class="btn btn-green" onclick="openAdmin()"><i class="fa-solid fa-plus"></i> Tambah Admin</button>
-          <button class="btn btn-gray" onclick="loadAdmins()"><i class="fa-solid fa-rotate"></i> Muat Ulang</button>
-        </div>
-      </div>
-      <div id="admin-error"></div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>ID</th><th>Nama Admin</th><th>Email</th><th>Telepon</th><th>Status</th><th>Aksi</th></tr></thead>
-          <tbody id="admin-body"><tr><td colspan="6">Memuat data admin...</td></tr></tbody>
-        </table>
-      </div>
-      <p class="hint">Fitur akun menggunakan endpoint backend admin. Sesuaikan endpoint dengan server SISEPCAMP kamu.</p>
-    </div>
-  </section>
+    <div id="customer-error"></div>
 
-  <!-- DATA PENYEWAAN -->
-  <section class="page" id="page-penyewaan">
-    <div class="page-heading">
-      <h1>Data Penyewaan</h1>
-      <p>Pantau transaksi penyewaan dan status pesanan pelanggan.</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nama</th>
+            <th>Email</th>
+            <th>Nomor KTP</th>
+            <th>Status Verifikasi KTP</th>
+          </tr>
+        </thead>
+        <tbody id="customer-body">
+          <tr><td colspan="5">Memuat data pelanggan...</td></tr>
+        </tbody>
+      </table>
     </div>
-    <div class="panel">
-      <div class="panel-header">
-        <h2>Semua Penyewaan</h2>
-        <button class="btn btn-green" onclick="loadOrders()"><i class="fa-solid fa-rotate"></i> Muat Ulang</button>
-      </div>
-      <div id="order-error"></div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>ID</th><th>Pelanggan</th><th>Tanggal Sewa</th><th>Tanggal Kembali</th><th>Total</th><th>Status</th></tr></thead>
-          <tbody id="order-body"><tr><td colspan="6">Memuat data...</td></tr></tbody>
-        </table>
-      </div>
-    </div>
-  </section>
+  </div>
+</section>
 
-  <!-- DATA PENGEMBALIAN -->
-  <section class="page" id="page-pengembalian">
-    <div class="page-heading">
-      <h1>Data Pengembalian</h1>
-      <p>Pantau pengembalian alat, kondisi barang, keterlambatan, dan denda.</p>
-    </div>
-    <div class="panel">
-      <div class="panel-header">
-        <h2>Catat Pengembalian</h2>
-      </div>
-      <div class="notice">Masukkan ID penyewaan yang sesuai dengan data pada tabel penyewaan.</div>
-      <div class="form-grid">
-        <div class="form-group"><label for="return-order-id">ID Penyewaan</label><input class="field" id="return-order-id" type="number" min="1" placeholder="Contoh: 12"></div>
-        <div class="form-group"><label for="return-condition">Kondisi Alat</label><select class="field" id="return-condition"><option value="baik">Baik</option><option value="rusak_ringan">Rusak Ringan</option><option value="rusak_berat">Rusak Berat</option><option value="hilang">Hilang</option></select></div>
-        <div class="form-group"><label for="return-fine">Denda (Rp)</label><input class="field" id="return-fine" type="number" min="0" value="0"></div>
-        <div class="form-group full"><label for="return-note">Catatan</label><textarea class="field" id="return-note" rows="3" placeholder="Catatan kondisi alat atau keterlambatan"></textarea></div>
-      </div>
-      <button class="btn btn-green" id="btn-return" onclick="catatPengembalian()"><i class="fa-solid fa-check"></i> Simpan Pengembalian</button>
-      <div id="return-action-error"></div>
-    </div>
-    <div class="panel">
-      <div class="panel-header">
-        <h2>Riwayat Pengembalian</h2>
-        <button class="btn btn-green" onclick="loadReturns()"><i class="fa-solid fa-rotate"></i> Muat Ulang</button>
-      </div>
-      <div id="return-error"></div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>ID Pengembalian</th><th>ID Penyewaan</th><th>Tanggal</th><th>Terlambat</th><th>Denda</th><th>Kondisi</th><th>Catatan</th></tr></thead>
-          <tbody id="return-body"><tr><td colspan="7">Memuat riwayat...</td></tr></tbody>
-        </table>
-      </div>
-    </div>
-  </section>
+<!-- LAPORAN -->
+<section class="page" id="page-laporan">
+  <div class="page-heading">
+    <h1>Laporan Manager</h1>
+    <p>Ringkasan aktivitas penyewaan, pengembalian, dan pelanggan SISEPCAMP.</p>
+  </div>
 
-  <!-- EVALUASI PELANGGAN -->
-  <section class="page" id="page-evaluasi">
-    <div class="page-heading">
-      <h1>Evaluasi Pelanggan</h1>
-      <p>Tinjau ulasan, rating, dan masukan pelanggan tentang layanan SISEPCAMP.</p>
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
+      <p>Total Pelanggan</p>
+      <h2 id="report-customer">—</h2>
     </div>
-    <div class="panel">
-      <div class="panel-header">
-        <h2>Ulasan Pelanggan</h2>
-        <button class="btn btn-green" onclick="loadEvaluasi()"><i class="fa-solid fa-rotate"></i> Muat Ulang</button>
-      </div>
-      <div id="evaluation-error"></div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>ID</th><th>Pelanggan</th><th>Rating</th><th>Ulasan</th><th>Tanggal</th></tr></thead>
-          <tbody id="evaluation-body"><tr><td colspan="5">Memuat evaluasi...</td></tr></tbody>
-        </table>
-      </div>
-      <p class="hint">Nama endpoint evaluasi perlu disesuaikan dengan backend yang digunakan.</p>
-    </div>
-  </section>
 
-  <!-- DATA PELANGGAN -->
-  <section class="page" id="page-pelanggan">
-    <div class="page-heading">
-      <h1>Data Pelanggan</h1>
-      <p>Lihat informasi akun pelanggan yang terdaftar.</p>
+    <div class="stat-card">
+      <div class="stat-icon"><i class="fa-solid fa-file-lines"></i></div>
+      <p>Total Penyewaan</p>
+      <h2 id="report-order">—</h2>
     </div>
-    <div class="panel">
-      <div class="panel-header">
-        <h2>Daftar Pelanggan</h2>
-        <div class="actions">
-          <input class="field search" id="search-customer" placeholder="Cari nama atau email...">
-          <button class="btn btn-green" onclick="loadPelanggan()"><i class="fa-solid fa-rotate"></i> Muat Ulang</button>
-        </div>
-      </div>
-      <div id="customer-error"></div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>ID</th><th>Nama</th><th>Email</th><th>Telepon</th><th>Alamat</th></tr></thead>
-          <tbody id="customer-body"><tr><td colspan="5">Memuat data pelanggan...</td></tr></tbody>
-        </table>
-      </div>
-    </div>
-  </section>
 
-  <!-- LAPORAN -->
-  <section class="page" id="page-laporan">
-    <div class="page-heading">
-      <h1>Laporan Manager</h1>
-      <p>Ringkasan aktivitas penyewaan dan pengelolaan pelanggan.</p>
+    <div class="stat-card">
+      <div class="stat-icon"><i class="fa-solid fa-money-bill-wave"></i></div>
+      <p>Total Nilai Penyewaan</p>
+      <h2 id="report-total">—</h2>
     </div>
-    <div class="stats">
-      <div class="stat-card"><div class="stat-icon"><i class="fa-solid fa-users"></i></div><p>Total Pelanggan</p><h2 id="report-customer">—</h2></div>
-      <div class="stat-card"><div class="stat-icon"><i class="fa-solid fa-user-shield"></i></div><p>Total Admin</p><h2 id="report-admin">—</h2></div>
-      <div class="stat-card"><div class="stat-icon"><i class="fa-solid fa-file-lines"></i></div><p>Total Penyewaan</p><h2 id="report-order">—</h2></div>
-      <div class="stat-card"><div class="stat-icon"><i class="fa-solid fa-money-bill-wave"></i></div><p>Total Nilai Penyewaan</p><h2 id="report-total">—</h2></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">
+      <h2>Ringkasan Laporan</h2>
+      <button class="btn btn-green no-print" onclick="loadAll()">
+        <i class="fa-solid fa-rotate"></i> Perbarui Laporan
+      </button>
     </div>
-    <div class="panel">
-      <div class="panel-header"><h2>Ringkasan Laporan</h2><button class="btn btn-green" onclick="loadAll()"><i class="fa-solid fa-rotate"></i> Perbarui Laporan</button></div>
-      <div id="report-error"></div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Keterangan</th><th>Jumlah</th></tr></thead>
-          <tbody id="report-body">
-            <tr><td>Total pelanggan terdaftar</td><td id="report-row-customer">—</td></tr>
-            <tr><td>Total akun admin</td><td id="report-row-admin">—</td></tr>
-            <tr><td>Total penyewaan</td><td id="report-row-order">—</td></tr>
-            <tr><td>Total pengembalian tercatat</td><td id="report-row-return">—</td></tr>
-            <tr><td>Total nilai penyewaan</td><td id="report-row-total">—</td></tr>
-          </tbody>
-        </table>
-      </div>
+
+    <div id="report-error"></div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Keterangan</th><th>Jumlah</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Total pelanggan terdaftar</td><td id="report-row-customer">—</td></tr>
+          <tr><td>Total penyewaan</td><td id="report-row-order">—</td></tr>
+          <tr><td>Total pengembalian tercatat</td><td id="report-row-return">—</td></tr>
+          <tr><td>Total nilai penyewaan</td><td id="report-row-total">—</td></tr>
+        </tbody>
+      </table>
     </div>
-    <div class="panel">
-      <button class="btn btn-blue" onclick="cetakLaporan()"><i class="fa-solid fa-print"></i> Cetak Laporan</button>
-    </div>
-  </section>
+  </div>
+
+  <div class="panel no-print">
+    <button class="btn btn-blue" onclick="cetakLaporan()">
+      <i class="fa-solid fa-print"></i> Cetak Laporan
+    </button>
+  </div>
+</section>
+
 </main>
 
-<!-- MODAL TAMBAH/EDIT ADMIN -->
-<div class="modal" id="admin-modal">
+<!-- MODAL DETAIL PENYEWAAN -->
+<div class="modal" id="detail-modal">
   <div class="modal-box">
-    <h2 id="admin-modal-title">Tambah Admin</h2>
-    <form id="admin-form">
-      <input type="hidden" id="admin-id">
-      <div class="form-group"><label for="admin-nama">Nama Admin</label><input class="field" id="admin-nama" required></div>
-      <div class="form-group"><label for="admin-email">Email</label><input class="field" id="admin-email" type="email" required></div>
-      <div class="form-group"><label for="admin-telepon">Nomor Telepon</label><input class="field" id="admin-telepon" type="tel"></div>
-      <div class="form-group"><label for="admin-password">Password <span id="password-hint">(wajib untuk admin baru)</span></label><input class="field" id="admin-password" type="password" minlength="6" autocomplete="new-password"></div>
-      <p class="hint">Pastikan endpoint backend menerima data akun sesuai nama kolom yang digunakan aplikasi kamu.</p>
-      <div class="actions" style="justify-content:flex-end">
-        <button type="button" class="btn btn-gray" onclick="closeAdmin()">Batal</button>
-        <button type="submit" class="btn btn-green"><i class="fa-solid fa-floppy-disk"></i> Simpan Admin</button>
-      </div>
-    </form>
-    <div id="admin-form-error"></div>
+    <div class="panel-header">
+      <h2>Detail Penyewaan</h2>
+      <button class="btn btn-gray" onclick="closeDetail()">Tutup</button>
+    </div>
+    <div id="detail-content"></div>
   </div>
 </div>
 
 <script>
 'use strict';
 
-const API='/api';
-let adminData=[],customerData=[],orderData=[],returnData=[],evaluationData=[];
+const API = '/api';
 
-function getToken(){return localStorage.getItem('token')||''}
-function getUser(){
-  try{return JSON.parse(localStorage.getItem('user')||'{}')}
-  catch{return {}}
+let customerData = [];
+let orderData = [];
+let returnData = [];
+let evaluationData = [];
+
+/* =========================
+   FUNGSI DASAR
+========================= */
+
+function getToken(){
+  return localStorage.getItem('token') || '';
 }
-function getRole(u){
-  const role=u.role?.nama_role??u.role?.nama??u.nama_role??u.role??'';
+
+function getUser(){
+  try{
+    return JSON.parse(localStorage.getItem('user') || '{}');
+  }catch(error){
+    return {};
+  }
+}
+
+function getRole(user){
+  let role = user.role;
+
+  if(role && typeof role === 'object'){
+    role = role.nama_role || role.nama || role.role;
+  }
+
+  role = role || user.nama_role || '';
+
   return String(role).toLowerCase().trim();
 }
+
 function rupiah(value){
   return new Intl.NumberFormat('id-ID',{
-    style:'currency',currency:'IDR',maximumFractionDigits:0
-  }).format(Number(value)||0);
+    style:'currency',
+    currency:'IDR',
+    maximumFractionDigits:0
+  }).format(Number(value) || 0);
 }
+
 function esc(value){
-  return String(value??'').replace(/[&<>"']/g,c=>({
-    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-  }[c]));
+  return String(value ?? '').replace(/[&<>"']/g,function(c){
+    return {
+      '&':'&amp;',
+      '<':'&lt;',
+      '>':'&gt;',
+      '"':'&quot;',
+      "'":'&#39;'
+    }[c];
+  });
 }
+
 function rowsOf(data){
-  if(Array.isArray(data))return data;
-  if(data&&Array.isArray(data.data))return data.data;
-  if(data&&Array.isArray(data.rows))return data.rows;
+  if(Array.isArray(data)) return data;
+  if(data && Array.isArray(data.data)) return data.data;
+  if(data && Array.isArray(data.rows)) return data.rows;
   return [];
 }
-async function api(path,options={}){
-  const headers={...(options.headers||{})};
-  if(getToken())headers.Authorization='Bearer '+getToken();
-  if(options.body&&!(options.body instanceof FormData)){
-    headers['Content-Type']='application/json';
-  }
-  const response=await fetch(API+path,{...options,headers});
-  let result={};
-  try{result=await response.json()}catch{}
-  if(!response.ok){
-    throw new Error(result.message||result.error||'Permintaan gagal ('+response.status+')');
-  }
-  if(result&&result.success===false){
-    throw new Error(result.message||'Permintaan gagal');
-  }
-  return result.data??result;
-}
+
 function setError(id,message){
-  const element=document.getElementById(id);
-  if(element)element.innerHTML=message?'<div class="error">'+esc(message)+'</div>':'';
+  const el = document.getElementById(id);
+  if(!el) return;
+
+  el.innerHTML = message
+    ? '<div class="error">'+esc(message)+'</div>'
+    : '';
 }
+
 function setText(id,value){
-  const element=document.getElementById(id);
-  if(element)element.textContent=value;
+  const el = document.getElementById(id);
+  if(el) el.textContent = value;
 }
+
+function formatDate(value){
+  if(!value) return '-';
+
+  const date = new Date(value);
+
+  if(Number.isNaN(date.getTime())){
+    return String(value);
+  }
+
+  return date.toLocaleString('id-ID');
+}
+
+/* =========================
+   KONEKSI API
+========================= */
+
+async function api(path,options = {}){
+  const headers = {
+    ...(options.headers || {})
+  };
+
+  const token = getToken();
+
+  if(token){
+    headers.Authorization = 'Bearer '+token;
+  }
+
+  if(options.body && !(options.body instanceof FormData)){
+    headers['Content-Type'] = 'application/json';
+  }
+
+  const response = await fetch(API+path,{
+    ...options,
+    headers
+  });
+
+  let result = {};
+
+  try{
+    result = await response.json();
+  }catch(error){
+    result = {};
+  }
+
+  if(!response.ok){
+    throw new Error(
+      result.message ||
+      result.error ||
+      'Permintaan gagal ('+response.status+')'
+    );
+  }
+
+  if(result && result.success === false){
+    throw new Error(result.message || 'Permintaan gagal');
+  }
+
+  return result.data ?? result;
+}
+
+/* =========================
+   CEK AKUN MANAGER
+========================= */
+
 function ensureManager(){
-  const user=getUser();
-  const role=getRole(user);
-  if(!getToken()||!['manager','manajer'].includes(role)){
-    alert('Silakan masuk menggunakan akun Manager.');
+  const token = getToken();
+  const user = getUser();
+  const role = getRole(user);
+
+  if(!token){
+    alert('Silakan login terlebih dahulu.');
     location.replace('/index.html');
     return false;
   }
-  setText('welcome','Selamat datang, '+(user.nama||user.nama_user||'Manager')+'. Kelola aktivitas SISEPCAMP dari halaman ini.');
+
+  if(!['manager','manajer'].includes(role)){
+    alert('Akun ini bukan akun Manager. Silakan masuk menggunakan akun Manager.');
+    location.replace('/index.html');
+    return false;
+  }
+
+  const nama = user.nama || user.nama_user || user.username || 'Manager';
+
+  setText(
+    'welcome',
+    'Selamat datang, '+nama+'. Kelola aktivitas SISEPCAMP dari halaman ini.'
+  );
+
   return true;
 }
 
-/* NAVIGASI */
-const pageTitles={
+/* =========================
+   NAVIGASI MENU
+========================= */
+
+const pageTitles = {
   dashboard:'Dashboard Manager',
-  admin:'Data Admin',
   penyewaan:'Data Penyewaan',
   pengembalian:'Data Pengembalian',
   evaluasi:'Evaluasi Pelanggan',
   pelanggan:'Data Pelanggan',
   laporan:'Laporan Manager'
 };
-function showPage(name){
-  if(!document.getElementById('page-'+name))return;
-  document.querySelectorAll('.page').forEach(page=>page.classList.remove('active'));
-  document.getElementById('page-'+name).classList.add('active');
-  document.querySelectorAll('.menu-sidebar button').forEach(button=>{
-    button.classList.toggle('active',button.dataset.page===name);
-  });
-  setText('navbar-title',pageTitles[name]||'Dashboard Manager');
 
-  if(name==='admin')loadAdmins();
-  if(name==='penyewaan')loadOrders();
-  if(name==='pengembalian')loadReturns();
-  if(name==='evaluasi')loadEvaluasi();
-  if(name==='pelanggan')loadPelanggan();
-  if(name==='laporan')updateReport();
+function showPage(name){
+  const target = document.getElementById('page-'+name);
+
+  if(!target) return;
+
+  document.querySelectorAll('.page').forEach(page=>{
+    page.classList.remove('active');
+  });
+
+  target.classList.add('active');
+
+  document.querySelectorAll('.menu-sidebar button').forEach(button=>{
+    button.classList.toggle(
+      'active',
+      button.dataset.page === name
+    );
+  });
+
+  setText('navbar-title',pageTitles[name] || 'Dashboard Manager');
+
+  if(name === 'penyewaan') loadOrders();
+  if(name === 'pengembalian') loadReturns();
+  if(name === 'evaluasi') loadEvaluasi();
+  if(name === 'pelanggan') loadPelanggan();
+  if(name === 'laporan') updateReport();
 }
+
 document.querySelectorAll('.menu-sidebar button').forEach(button=>{
-  button.addEventListener('click',()=>showPage(button.dataset.page));
+  button.addEventListener('click',()=>{
+    showPage(button.dataset.page);
+  });
 });
 
-/* LOGOUT */
+/* =========================
+   LOGOUT
+========================= */
+
 function logoutManager(){
-  if(!confirm('Yakin ingin keluar dari akun Manager?'))return;
+  if(!confirm('Yakin ingin keluar dari akun Manager?')){
+    return;
+  }
+
   localStorage.removeItem('token');
   localStorage.removeItem('user');
   sessionStorage.clear();
+
   location.replace('/index.html');
 }
-document.getElementById('logout-navbar').addEventListener('click',logoutManager);
-document.getElementById('logout-sidebar').addEventListener('click',logoutManager);
 
-/* DATA ADMIN */
-async function loadAdmins(){
-  setError('admin-error','');
-  setText('admin-body','');
-  document.getElementById('admin-body').innerHTML='<tr><td colspan="6">Memuat data admin...</td></tr>';
-  try{
-    adminData=rowsOf(await api('/admin'));
-    renderAdmins();
-  }catch(error){
-    document.getElementById('admin-body').innerHTML='<tr><td colspan="6" class="empty">Data admin tidak dapat dimuat.</td></tr>';
-    setError('admin-error',error.message);
-  }
-}
-function renderAdmins(){
-  const query=(document.getElementById('search-admin').value||'').toLowerCase();
-  const filtered=adminData.filter(admin=>
-    String(admin.nama??admin.nama_user??'').toLowerCase().includes(query)||
-    String(admin.email??'').toLowerCase().includes(query)
-  );
-  document.getElementById('admin-body').innerHTML=filtered.length?filtered.map(admin=>{
-    const id=Number(admin.id_admin??admin.id_user??admin.id);
-    return `<tr>
-      <td>${esc(id)}</td>
-      <td>${esc(admin.nama??admin.nama_user??'-')}</td>
-      <td>${esc(admin.email??'-')}</td>
-      <td>${esc(admin.telepon??admin.no_telepon??'-')}</td>
-      <td><span class="status">${esc(admin.status??'Aktif')}</span></td>
-      <td><div class="actions">
-        <button class="btn btn-yellow" onclick="editAdmin(${id})"><i class="fa-solid fa-pen"></i> Edit</button>
-        <button class="btn btn-red" onclick="hapusAdmin(${id})"><i class="fa-solid fa-trash"></i> Hapus</button>
-      </div></td>
-    </tr>`;
-  }).join(''):'<tr><td colspan="6" class="empty">Belum ada data admin.</td></tr>';
-  setText('stat-admin',adminData.length);
-  setText('report-admin',adminData.length);
-  setText('report-row-admin',adminData.length);
-}
-document.getElementById('search-admin').addEventListener('input',renderAdmins);
+document.getElementById('logout-navbar')
+  .addEventListener('click',logoutManager);
 
-function openAdmin(admin=null){
-  document.getElementById('admin-form').reset();
-  setError('admin-form-error','');
-  setText('admin-id',admin?.id_admin??admin?.id_user??admin?.id??'');
-  document.getElementById('admin-id').value=admin?.id_admin??admin?.id_user??admin?.id??'';
-  setText('admin-modal-title',admin?'Edit Admin':'Tambah Admin');
-  setText('password-hint',admin?'(kosongkan jika tidak diganti)':'(wajib untuk admin baru)');
-  document.getElementById('admin-nama').value=admin?.nama??admin?.nama_user??'';
-  document.getElementById('admin-email').value=admin?.email??'';
-  document.getElementById('admin-telepon').value=admin?.telepon??admin?.no_telepon??'';
-  document.getElementById('admin-password').required=!admin;
-  document.getElementById('admin-modal').classList.add('show');
-}
-function closeAdmin(){
-  document.getElementById('admin-modal').classList.remove('show');
-}
-function editAdmin(id){
-  const admin=adminData.find(item=>Number(item.id_admin??item.id_user??item.id)===id);
-  if(admin)openAdmin(admin);
-}
-document.getElementById('admin-form').addEventListener('submit',async event=>{
-  event.preventDefault();
-  const id=document.getElementById('admin-id').value;
-  const password=document.getElementById('admin-password').value;
-  const payload={
-    nama:document.getElementById('admin-nama').value.trim(),
-    email:document.getElementById('admin-email').value.trim(),
-    telepon:document.getElementById('admin-telepon').value.trim()
-  };
-  if(password)payload.password=password;
-  try{
-    await api('/admin'+(id?'/'+encodeURIComponent(id):''),{
-      method:id?'PUT':'POST',body:JSON.stringify(payload)
-    });
-    closeAdmin();
-    await loadAdmins();
-    alert('Data admin berhasil disimpan.');
-  }catch(error){
-    setError('admin-form-error',error.message);
-  }
-});
-async function hapusAdmin(id){
-  if(!confirm('Yakin ingin menghapus akun admin ID '+id+'?'))return;
-  try{
-    await api('/admin/'+encodeURIComponent(id),{method:'DELETE'});
-    await loadAdmins();
-    alert('Admin berhasil dihapus.');
-  }catch(error){
-    alert('Gagal menghapus admin: '+error.message);
-  }
-}
+document.getElementById('logout-sidebar')
+  .addEventListener('click',logoutManager);
 
-/* DATA PELANGGAN */
+/* =========================
+   DATA PELANGGAN
+========================= */
+
 async function loadPelanggan(){
   setError('customer-error','');
-  document.getElementById('customer-body').innerHTML='<tr><td colspan="5">Memuat data...</td></tr>';
+
+  document.getElementById('customer-body').innerHTML =
+    '<tr><td colspan="5">Memuat data...</td></tr>';
+
   try{
-    customerData=rowsOf(await api('/pelanggan'));
+    const result = await api('/pelanggan');
+
+    customerData = rowsOf(result);
+
     renderPelanggan();
+
   }catch(error){
-    document.getElementById('customer-body').innerHTML='<tr><td colspan="5" class="empty">Data pelanggan tidak dapat dimuat.</td></tr>';
+    document.getElementById('customer-body').innerHTML =
+      '<tr><td colspan="5" class="empty">Data pelanggan tidak dapat dimuat.</td></tr>';
+
     setError('customer-error',error.message);
   }
 }
+
 function renderPelanggan(){
-  const query=(document.getElementById('search-customer').value||'').toLowerCase();
-  const filtered=customerData.filter(customer=>
-    String(customer.nama??customer.nama_user??customer.nama_pelanggan??'').toLowerCase().includes(query)||
-    String(customer.email??'').toLowerCase().includes(query)
-  );
-  document.getElementById('customer-body').innerHTML=filtered.length?filtered.map(customer=>`<tr>
-    <td>${esc(customer.id_user??customer.id_pelanggan??customer.id??'-')}</td>
-    <td>${esc(customer.nama??customer.nama_user??customer.nama_pelanggan??'-')}</td>
-    <td>${esc(customer.email??'-')}</td>
-    <td>${esc(customer.telepon??customer.no_telepon??'-')}</td>
-    <td>${esc(customer.alamat??'-')}</td>
-  </tr>`).join(''):'<tr><td colspan="5" class="empty">Belum ada data pelanggan.</td></tr>';
+  const search = (
+    document.getElementById('search-customer').value || ''
+  ).toLowerCase();
+
+  const list = customerData.filter(customer=>{
+    return (
+      String(customer.nama || '').toLowerCase().includes(search) ||
+      String(customer.email || '').toLowerCase().includes(search)
+    );
+  });
+
+  document.getElementById('customer-body').innerHTML =
+    list.length
+    ? list.map(customer=>`
+      <tr>
+        <td>${esc(customer.id_user)}</td>
+        <td>${esc(customer.nama)}</td>
+        <td>${esc(customer.email)}</td>
+        <td>${esc(customer.nomor_ktp || '-')}</td>
+        <td>
+          <span class="status">
+            ${esc(customer.status_verifikasi_ktp || 'Belum ada status')}
+          </span>
+        </td>
+      </tr>
+    `).join('')
+    : '<tr><td colspan="5" class="empty">Belum ada data pelanggan.</td></tr>';
+
   setText('stat-pelanggan',customerData.length);
   setText('report-customer',customerData.length);
   setText('report-row-customer',customerData.length);
 }
-document.getElementById('search-customer').addEventListener('input',renderPelanggan);
 
-/* DATA PENYEWAAN */
+document.getElementById('search-customer')
+  .addEventListener('input',renderPelanggan);
+
+/* =========================
+   DATA PENYEWAAN
+========================= */
+
 async function loadOrders(){
   setError('order-error','');
-  document.getElementById('order-body').innerHTML='<tr><td colspan="6">Memuat data...</td></tr>';
+  setError('dashboard-error','');
+
+  document.getElementById('order-body').innerHTML =
+    '<tr><td colspan="8">Memuat data...</td></tr>';
+
   try{
-    orderData=rowsOf(await api('/pemesanan'));
+    const result = await api('/pemesanan');
+
+    orderData = rowsOf(result);
+
     renderOrders();
+
   }catch(error){
-    document.getElementById('order-body').innerHTML='<tr><td colspan="6" class="empty">Data penyewaan tidak dapat dimuat.</td></tr>';
+    document.getElementById('order-body').innerHTML =
+      '<tr><td colspan="8" class="empty">Data penyewaan tidak dapat dimuat.</td></tr>';
+
     setError('order-error',error.message);
     setError('dashboard-error',error.message);
   }
 }
-function orderStatus(order){
-  return order.status_pemesanan??order.status??'-';
+
+function statusOrder(order){
+  return order.status_pemesanan ?? '-';
 }
+
 function renderOrders(){
-  document.getElementById('order-body').innerHTML=orderData.length?orderData.map(order=>`<tr>
-    <td>${esc(order.id_pemesanan??order.id??'-')}</td>
-    <td>${esc(order.nama_penyewa??order.nama_pelanggan??order.nama??order.id_user??'-')}</td>
-    <td>${esc(order.tanggal_sewa??'-')}</td>
-    <td>${esc(order.tanggal_kembali_rencana??order.tanggal_kembali??'-')}</td>
-    <td>${rupiah(order.total_harga??order.total_bayar)}</td>
-    <td><span class="status">${esc(orderStatus(order))}</span></td>
-  </tr>`).join(''):'<tr><td colspan="6" class="empty">Belum ada data penyewaan.</td></tr>';
+  document.getElementById('order-body').innerHTML =
+    orderData.length
+    ? orderData.map(order=>`
+      <tr>
+        <td>${esc(order.id_pemesanan)}</td>
+        <td>${esc(order.nama_penyewa || '-')}</td>
+        <td>${esc(formatDate(order.tanggal_pesan))}</td>
+        <td>${esc(formatDate(order.tanggal_sewa))}</td>
+        <td>${esc(formatDate(order.tanggal_kembali_rencana))}</td>
+        <td>${rupiah(order.total_harga)}</td>
+        <td><span class="status">${esc(statusOrder(order))}</span></td>
+        <td>
+          <button class="btn btn-blue"
+            onclick="lihatDetail(${Number(order.id_pemesanan)})">
+            <i class="fa-solid fa-eye"></i> Detail
+          </button>
+        </td>
+      </tr>
+    `).join('')
+    : '<tr><td colspan="8" class="empty">Belum ada data penyewaan.</td></tr>';
 
   setText('stat-order',orderData.length);
   setText('report-order',orderData.length);
   setText('report-row-order',orderData.length);
-  setText('report-total',rupiah(orderData.reduce((sum,order)=>sum+Number(order.total_harga??order.total_bayar??0),0)));
-  setText('report-row-total',rupiah(orderData.reduce((sum,order)=>sum+Number(order.total_harga??order.total_bayar??0),0)));
 
-  document.getElementById('recent-body').innerHTML=orderData.slice(0,5).map(order=>`<tr>
-    <td>${esc(order.id_pemesanan??order.id??'-')}</td>
-    <td>${esc(order.nama_penyewa??order.nama_pelanggan??order.nama??order.id_user??'-')}</td>
-    <td>${esc(order.tanggal_sewa??'-')}</td>
-    <td>${rupiah(order.total_harga??order.total_bayar)}</td>
-    <td><span class="status">${esc(orderStatus(order))}</span></td>
-  </tr>`).join('')||'<tr><td colspan="5" class="empty">Belum ada penyewaan.</td></tr>';
+  const total = orderData.reduce((sum,order)=>{
+    return sum + Number(order.total_harga || 0);
+  },0);
+
+  setText('report-total',rupiah(total));
+  setText('report-row-total',rupiah(total));
+
+  document.getElementById('recent-body').innerHTML =
+    orderData.length
+    ? orderData.slice(0,5).map(order=>`
+      <tr>
+        <td>${esc(order.id_pemesanan)}</td>
+        <td>${esc(order.nama_penyewa || '-')}</td>
+        <td>${esc(formatDate(order.tanggal_sewa))}</td>
+        <td>${rupiah(order.total_harga)}</td>
+        <td><span class="status">${esc(statusOrder(order))}</span></td>
+      </tr>
+    `).join('')
+    : '<tr><td colspan="5" class="empty">Belum ada penyewaan.</td></tr>';
 }
 
-/* DATA PENGEMBALIAN */
+/* =========================
+   DETAIL PENYEWAAN
+========================= */
+
+async function lihatDetail(id){
+  const box = document.getElementById('detail-content');
+
+  box.innerHTML = 'Memuat detail...';
+
+  document.getElementById('detail-modal').style.display = 'flex';
+
+  try{
+    const result = await api('/pemesanan/'+encodeURIComponent(id));
+
+    const detail = result.data || result;
+    const items = Array.isArray(detail.items) ? detail.items : [];
+
+    box.innerHTML = `
+      <div class="notice">
+        <b>ID Penyewaan:</b> ${esc(detail.id_pemesanan ?? id)}<br>
+        <b>Pelanggan:</b> ${esc(detail.nama_penyewa || detail.id_user || '-')}<br>
+        <b>Tanggal Pesan:</b> ${esc(formatDate(detail.tanggal_pesan))}<br>
+        <b>Tanggal Sewa:</b> ${esc(formatDate(detail.tanggal_sewa))}<br>
+        <b>Rencana Kembali:</b> ${esc(formatDate(detail.tanggal_kembali_rencana))}<br>
+        <b>Status:</b> ${esc(detail.status_pemesanan || '-')}<br>
+        <b>Total:</b> ${rupiah(detail.total_harga)}
+      </div>
+
+      <h3 style="color:var(--dark)">Rincian Peralatan</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Nama Alat</th>
+              <th>Jumlah</th>
+              <th>Durasi</th>
+              <th>Subtotal</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            ${
+              items.length
+              ? items.map(item=>`
+                <tr>
+                  <td>${esc(item.nama_alat || '-')}</td>
+                  <td>${esc(item.jumlah ?? '-')}</td>
+                  <td>${esc(item.durasi_hari ?? '-')} hari</td>
+                  <td>${rupiah(item.subtotal)}</td>
+                </tr>
+              `).join('')
+              : '<tr><td colspan="4" class="empty">Rincian alat tidak tersedia.</td></tr>'
+            }
+          </tbody>
+        </table>
+      </div>
+    `;
+
+  }catch(error){
+    box.innerHTML = '<div class="error">'+esc(error.message)+'</div>';
+  }
+}
+
+function closeDetail(){
+  document.getElementById('detail-modal').style.display = 'none';
+}
+
+/* =========================
+   DATA PENGEMBALIAN
+========================= */
+
 async function loadReturns(){
   setError('return-error','');
-  document.getElementById('return-body').innerHTML='<tr><td colspan="7">Memuat data...</td></tr>';
+
+  document.getElementById('return-body').innerHTML =
+    '<tr><td colspan="7">Memuat data...</td></tr>';
+
   try{
-    returnData=rowsOf(await api('/pengembalian'));
+    const result = await api('/pengembalian');
+
+    returnData = rowsOf(result);
+
     renderReturns();
+
   }catch(error){
-    document.getElementById('return-body').innerHTML='<tr><td colspan="7" class="empty">Riwayat pengembalian tidak dapat dimuat.</td></tr>';
+    document.getElementById('return-body').innerHTML =
+      '<tr><td colspan="7" class="empty">Riwayat pengembalian tidak dapat dimuat.</td></tr>';
+
     setError('return-error',error.message);
   }
 }
+
 function renderReturns(){
-  document.getElementById('return-body').innerHTML=returnData.length?returnData.map(item=>`<tr>
-    <td>${esc(item.id_pengembalian??item.id??'-')}</td>
-    <td>${esc(item.id_pemesanan??'-')}</td>
-    <td>${esc(item.tanggal_pengembalian_aktual??item.tanggal_pengembalian??'-')}</td>
-    <td>${esc(item.hari_terlambat??0)}</td>
-    <td>${rupiah(item.denda)}</td>
-    <td>${esc(item.kondisi_alat??'-')}</td>
-    <td>${esc(item.catatan??'-')}</td>
-  </tr>`).join(''):'<tr><td colspan="7" class="empty">Belum ada riwayat pengembalian.</td></tr>';
+  document.getElementById('return-body').innerHTML =
+    returnData.length
+    ? returnData.map(item=>`
+      <tr>
+        <td>${esc(item.id_pengembalian ?? '-')}</td>
+        <td>${esc(item.id_pemesanan ?? '-')}</td>
+        <td>${esc(formatDate(item.tanggal_kembali_aktual))}</td>
+        <td>${esc(item.hari_terlambat ?? 0)} hari</td>
+        <td>${rupiah(item.denda)}</td>
+        <td><span class="status">${esc(item.kondisi_alat ?? '-')}</span></td>
+        <td>${esc(item.catatan || '-')}</td>
+      </tr>
+    `).join('')
+    : '<tr><td colspan="7" class="empty">Belum ada riwayat pengembalian.</td></tr>';
+
   setText('stat-return',returnData.length);
   setText('report-row-return',returnData.length);
 }
-async function catatPengembalian(){
-  const id=document.getElementById('return-order-id').value.trim();
-  const fineInput=document.getElementById('return-fine').value;
-  const fine=Number(fineInput);
-  if(!id||Number(id)<1){alert('Masukkan ID penyewaan yang valid.');return}
-  if(fineInput===''||!Number.isFinite(fine)||fine<0){alert('Masukkan denda yang valid.');return}
-  const button=document.getElementById('btn-return');
-  button.disabled=true;
-  setError('return-action-error','');
-  try{
-    await api('/pengembalian/'+encodeURIComponent(id),{
-      method:'POST',
-      body:JSON.stringify({
-        kondisi_alat:document.getElementById('return-condition').value,
-        denda:fine,
-        catatan:document.getElementById('return-note').value.trim()
-      })
-    });
-    document.getElementById('return-order-id').value='';
-    document.getElementById('return-fine').value='0';
-    document.getElementById('return-note').value='';
-    alert('Pengembalian berhasil dicatat.');
-    await Promise.allSettled([loadReturns(),loadOrders()]);
-  }catch(error){
-    setError('return-action-error',error.message);
-    alert('Gagal mencatat pengembalian: '+error.message);
-  }finally{
-    button.disabled=false;
-  }
-}
 
-/* EVALUASI PELANGGAN */
+/* =========================
+   EVALUASI PELANGGAN
+========================= */
+
 async function loadEvaluasi(){
   setError('evaluation-error','');
-  document.getElementById('evaluation-body').innerHTML='<tr><td colspan="5">Memuat evaluasi...</td></tr>';
+
+  document.getElementById('evaluation-body').innerHTML =
+    '<tr><td colspan="6">Memuat evaluasi...</td></tr>';
+
   try{
-    evaluationData=rowsOf(await api('/evaluasi'));
+    const result = await api('/evaluasi');
+
+    evaluationData = rowsOf(result);
+
     renderEvaluasi();
+
   }catch(error){
-    document.getElementById('evaluation-body').innerHTML='<tr><td colspan="5" class="empty">Data evaluasi belum dapat dimuat.</td></tr>';
+    document.getElementById('evaluation-body').innerHTML =
+      '<tr><td colspan="6" class="empty">Data evaluasi tidak dapat dimuat.</td></tr>';
+
     setError('evaluation-error',error.message);
   }
 }
+
 function renderEvaluasi(){
-  document.getElementById('evaluation-body').innerHTML=evaluationData.length?evaluationData.map(item=>`<tr>
-    <td>${esc(item.id_evaluasi??item.id_ulasan??item.id??'-')}</td>
-    <td>${esc(item.nama_pelanggan??item.nama_user??item.nama??'-')}</td>
-    <td>${'★'.repeat(Math.max(0,Math.min(5,Number(item.rating??item.nilai_rating??0))))}</td>
-    <td>${esc(item.ulasan??item.komentar??item.pesan??'-')}</td>
-    <td>${esc(item.created_at??item.tanggal??item.tanggal_ulasan??'-')}</td>
-  </tr>`).join(''):'<tr><td colspan="5" class="empty">Belum ada evaluasi pelanggan.</td></tr>';
+  document.getElementById('evaluation-body').innerHTML =
+    evaluationData.length
+    ? evaluationData.map(item=>`
+      <tr>
+        <td>${esc(item.id_evaluasi)}</td>
+        <td>${esc(item.id_pemesanan)}</td>
+        <td>${esc(item.nama_pelanggan || '-')}</td>
+        <td>
+          <span style="color:#e9a11a">
+            ${'★'.repeat(Math.max(0,Math.min(5,Number(item.rating)||0)))}
+          </span>
+          (${esc(item.rating)}/5)
+        </td>
+        <td>${esc(item.ulasan || '-')}</td>
+        <td>${esc(formatDate(item.tanggal_ulasan))}</td>
+      </tr>
+    `).join('')
+    : '<tr><td colspan="6" class="empty">Belum ada evaluasi pelanggan.</td></tr>';
 }
 
-/* LAPORAN */
+/* =========================
+   LAPORAN
+========================= */
+
 function updateReport(){
+  const total = orderData.reduce((sum,order)=>{
+    return sum + Number(order.total_harga || 0);
+  },0);
+
   setText('report-customer',customerData.length);
-  setText('report-admin',adminData.length);
   setText('report-order',orderData.length);
-  setText('report-total',rupiah(orderData.reduce((sum,order)=>sum+Number(order.total_harga??order.total_bayar??0),0)));
+  setText('report-total',rupiah(total));
+
   setText('report-row-customer',customerData.length);
-  setText('report-row-admin',adminData.length);
   setText('report-row-order',orderData.length);
   setText('report-row-return',returnData.length);
-  setText('report-row-total',rupiah(orderData.reduce((sum,order)=>sum+Number(order.total_harga??order.total_bayar??0),0)));
+  setText('report-row-total',rupiah(total));
 }
+
+/* =========================
+   MUAT SEMUA DATA
+========================= */
+
 async function loadAll(){
   setError('dashboard-error','');
+  setError('report-error','');
+
   await Promise.allSettled([
-    loadAdmins(),
     loadPelanggan(),
     loadOrders(),
     loadReturns()
   ]);
+
   updateReport();
-}
-function cetakLaporan(){
-  updateReport();
-  window.print();
 }
 
-/* MODAL */
-document.getElementById('admin-modal').addEventListener('click',event=>{
-  if(event.target.id==='admin-modal')closeAdmin();
-});
-document.addEventListener('keydown',event=>{
-  if(event.key==='Escape'){
-    closeAdmin();
+/* =========================
+   CETAK LAPORAN
+========================= */
+
+function cetakLaporan(){
+  updateReport();
+  showPage('laporan');
+
+  setTimeout(()=>{
+    window.print();
+  },200);
+}
+
+/* =========================
+   MODAL
+========================= */
+
+document.getElementById('detail-modal')
+  .addEventListener('click',function(event){
+    if(event.target.id === 'detail-modal'){
+      closeDetail();
+    }
+  });
+
+document.addEventListener('keydown',function(event){
+  if(event.key === 'Escape'){
+    closeDetail();
   }
 });
 
-/* MULAI */
+/* =========================
+   MULAI HALAMAN
+========================= */
+
 if(ensureManager()){
   loadAll();
 }
+
 </script>
 </body>
 </html>

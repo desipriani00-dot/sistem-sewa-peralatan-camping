@@ -880,7 +880,8 @@ function getPrice(p) {
 }
 
 function getStock(p){
- return Number(p.stok??p.jumlah_stok??p.stock??0);
+ // Gunakan sisa_stok dari API jika tersedia; stok adalah stok total di database.
+ return Number(p.sisa_stok??p.stok_tersedia??p.stok??p.jumlah_stok??p.stock??0);
 }
 function getImage(p){
  return p.gambar||p.foto||p.foto_alat||p.image||'';
@@ -929,7 +930,7 @@ function showPage(id,el){
  if(id==='keranjang')renderCart();
  if(id==='checkout')renderCheckout();
  if(id==='pesanan')loadOrders();
- if(id==='riwayat')renderHistory();
+ if(id==='riwayat')loadOrders();
  if(id==='profil')renderProfile();
  if(id==='edit-profil')fillProfileForm();
 }
@@ -1161,6 +1162,7 @@ async function submitCheckout(event) {
     cart = [];
     setCart();
     await loadOrders();
+    await loadProducts(); // perbarui stok katalog setelah pesanan berhasil dibuat
     showPage("pesanan");
   } catch (error) {
     alert("Pesanan gagal: " + error.message);
@@ -1173,54 +1175,62 @@ function statusBadge(status){
  if(s.includes('sewa')||s.includes('disetujui')||s.includes('proses'))return '<span class="badge bg-disewa">'+esc(status)+'</span>';
  return '<span class="badge bg-proses">'+esc(status||'Menunggu Konfirmasi')+'</span>';
 }
+function getLatestPayment(order){
+  // Mendukung beberapa bentuk hasil API: object pembayaran atau daftar pembayaran.
+  const candidates = [
+    order?.pembayaran_terakhir,
+    order?.pembayaranTerakhir,
+    order?.pembayaran,
+    order?.payment,
+    order?.latest_payment,
+    order?.pembayaran_list,
+    order?.payments
+  ];
+  for(const value of candidates){
+    if(Array.isArray(value) && value.length){
+      return value.slice().sort((a,b)=>Number(b.id_pembayaran||b.id||0)-Number(a.id_pembayaran||a.id||0))[0];
+    }
+    if(value && typeof value === 'object') return value;
+  }
+  // Sebagian endpoint mengirim status pembayaran langsung pada object pesanan.
+  const directStatus = order?.status_pembayaran || order?.payment_status;
+  return directStatus ? {
+    status_pembayaran: directStatus,
+    alasan_penolakan: order?.alasan_penolakan || order?.catatan_penolakan || order?.keterangan_pembayaran || ''
+  } : null;
+}
 function renderOrderTable(list, containerId) {
   const container = document.getElementById(containerId);
+  if (!container) return;
 
   if (!list.length) {
-    container.innerHTML = `
-      <div class="empty">
-        <i class="fa-solid fa-box-open"></i>
-        <p>Belum ada data pesanan.</p>
-      </div>`;
+    container.innerHTML =       '<div class="empty"><i class="fa-solid fa-box-open"></i><p>Belum ada data pesanan.</p></div>';
     return;
   }
 
-  container.innerHTML = `
-    <table>
-      <thead>
-        <tr>
-          <th>No</th>
-          <th>Nomor Pesanan</th>
-          <th>Tanggal</th>
-          <th>Total</th>
-          <th>Status</th>
-          <th>Pembayaran</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${list.map((o, i) => {
-          const id = Number(o.id_pemesanan ?? o.id);
-          const status = String(o.status_pemesanan || o.status || '').toLowerCase();
+  container.innerHTML =     '<table><thead><tr><th>No</th><th>Nomor Pesanan</th><th>Tanggal</th><th>Total</th><th>Status</th><th>Pembayaran</th></tr></thead><tbody>' +
+    list.map((o, i) => {
+      const id = Number(o.id_pemesanan ?? o.id);
+      const orderStatus = String(o.status_pemesanan || o.status || '').toLowerCase().trim();
+      const payment = getLatestPayment(o);
+      const paymentStatus = String(payment?.status_pembayaran || payment?.status || '').toLowerCase().trim();
+      const rejectionReason = payment?.alasan_penolakan || payment?.catatan_penolakan || payment?.keterangan || payment?.catatan || '';
+      let paymentHtml = '-';
 
-          return `
-            <tr>
-              <td>${i + 1}</td>
-              <td>${esc(o.kode_pemesanan || id || '-')}</td>
-              <td>${esc(o.tanggal_sewa || o.created_at || o.tanggal_pemesanan || '-')}</td>
-              <td>${rupiah(o.total_harga || o.total || 0)}</td>
-              <td>${statusBadge(status)}</td>
-              <td>
-                ${status === 'menunggu' && id
-                  ? `<button class="btn btn-green"
-                       onclick="uploadPayment(${id})">
-                       <i class="fa-solid fa-upload"></i> Upload Bukti
-                     </button>`
-                  : '-'}
-              </td>
-            </tr>`;
-        }).join('')}
-      </tbody>
-    </table>`;
+      if(paymentStatus === 'ditolak' || paymentStatus === 'rejected'){
+        paymentHtml = '<div style="min-width:190px"><div style="color:#B42318;font-weight:700;margin-bottom:6px"><i class="fa-solid fa-circle-exclamation"></i> Pembayaran ditolak</div>' +
+          (rejectionReason ? '<div style="font-size:10px;color:#8B2922;margin-bottom:8px">Alasan: ' + esc(rejectionReason) + '</div>' : '<div style="font-size:10px;color:#8B2922;margin-bottom:8px">Silakan unggah ulang bukti pembayaran yang benar.</div>') +
+          (orderStatus === 'menunggu' && id ? '<button class="btn btn-green" onclick="uploadPayment(' + id + ')"><i class="fa-solid fa-rotate"></i> Upload Ulang</button>' : '<small>Hubungi admin untuk bantuan.</small>') + '</div>';
+      }else if(paymentStatus === 'menunggu' || paymentStatus === 'pending'){
+        paymentHtml = '<span class="badge bg-proses">Menunggu verifikasi</span>';
+      }else if(paymentStatus === 'berhasil' || paymentStatus === 'success' || paymentStatus === 'lunas'){
+        paymentHtml = '<span class="badge bg-disewa">Pembayaran berhasil</span>';
+      }else if(orderStatus === 'menunggu' && id){
+        paymentHtml = '<button class="btn btn-green" onclick="uploadPayment(' + id + ')"><i class="fa-solid fa-upload"></i> Upload Bukti</button>';
+      }
+
+      return '<tr><td>' + (i+1) + '</td><td>' + esc(o.kode_pemesanan || id || '-') + '</td><td>' + esc(o.tanggal_sewa || o.created_at || o.tanggal_pemesanan || '-') + '</td><td>' + rupiah(o.total_harga || o.total || 0) + '</td><td>' + statusBadge(orderStatus) + '</td><td>' + paymentHtml + '</td></tr>';
+    }).join('') + '</tbody></table>';
 }
 async function uploadPayment(id) {
   if (!token) {
@@ -1231,11 +1241,9 @@ async function uploadPayment(id) {
   const input = document.createElement('input');
   input.type = 'file';
   input.accept = 'image/jpeg,image/png,image/webp';
-
   input.onchange = async () => {
-    const file = input.files[0];
+    const file = input.files && input.files[0];
     if (!file) return;
-
     if (file.size > 2 * 1024 * 1024) {
       alert('Ukuran foto maksimal 2 MB.');
       return;
@@ -1244,26 +1252,20 @@ async function uploadPayment(id) {
     const formData = new FormData();
     formData.append('bukti', file);
     formData.append('metode_pembayaran', 'transfer');
-
     try {
-      const result = await apiFetch(
-        `/pembayaran/pemesanan/${id}`,
-        {
-          method: 'POST',
-          body: formData
-        }
-      );
-
-      alert(result.message || 'Bukti pembayaran berhasil dikirim.');
-
+      const result = await apiFetch('/pembayaran/pemesanan/' + id, {
+        method: 'POST',
+        body: formData
+      });
+      alert(result.message || result.pesan || 'Bukti pembayaran berhasil dikirim dan menunggu verifikasi admin.');
       await loadOrders();
     } catch (error) {
       alert('Upload bukti pembayaran gagal: ' + error.message);
     }
   };
-
   input.click();
 }
+
 async function loadMyEvaluations(){
   try{
     const result = unwrap(await apiFetch('/evaluasi/saya'));
@@ -1330,7 +1332,11 @@ async function loadOrders() {
                 data.data ||
                 []
             );
-
+console.table(orders.map(o => ({
+  id: o.id_pemesanan,
+  status_pemesanan: o.status_pemesanan,
+  status: o.status
+})));
         renderOrderTable(orders, 'ordersContent');
 await loadMyEvaluations();
 renderHistory();
@@ -1351,60 +1357,124 @@ renderHistory();
 
 function renderHistory(){
   const completed = orders.filter(o => {
-    const s = String(o.status_pemesanan || o.status || '').toLowerCase();
-    return s === 'selesai' || s === 'kembali';
+    const s = String(o.status_pemesanan || o.status || '').toLowerCase().trim();
+    return ['selesai','kembali','dikembalikan'].includes(s);
   });
-
   const container = document.getElementById('historyContent');
+  if(!container) return;
 
   if(!completed.length){
-    container.innerHTML =
-      '<div class="empty"><i class="fa-solid fa-clock"></i>' +
-      '<p>Belum ada penyewaan yang selesai.</p></div>';
+    container.innerHTML = '<div class="empty"><i class="fa-solid fa-clock"></i><p>Belum ada penyewaan yang selesai.</p><button class="btn btn-green" style="margin-top:14px" onclick="showPage(\'sewa\')">Mulai Sewa</button></div>';
     return;
   }
 
   container.innerHTML = `
-    <table>
-      <thead>
-        <tr>
-          <th>No</th>
-          <th>Nomor Pesanan</th>
-          <th>Tanggal</th>
-          <th>Total</th>
-          <th>Status</th>
-          <th>Evaluasi</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${completed.map((o,i) => {
-          const id = o.id_pemesanan ?? o.id;
-          const evaluasi = evaluations.find(
-            e => Number(e.id_pemesanan) === Number(id)
-          );
-
-          return `<tr>
-            <td>${i+1}</td>
-            <td>${esc(o.kode_pemesanan || id || '-')}</td>
-            <td>${esc(o.tanggal_sewa || o.created_at || '-')}</td>
-            <td>${rupiah(o.total_harga || o.total || 0)}</td>
-            <td>${statusBadge(o.status_pemesanan || o.status)}</td>
-            <td>
-              ${evaluasi
-                ? `<span style="color:#287C35;font-weight:700">
-                     ★ ${esc(evaluasi.rating)}/5
-                   </span>`
-                : `<button class="btn btn-green"
-                     onclick="submitEvaluation(${Number(id)})">
-                     Beri Rating
-                   </button>`
-              }
-            </td>
-          </tr>`;
-        }).join('')}
-      </tbody>
-    </table>`;
+    <div style="padding:18px;display:grid;gap:14px">
+      ${completed.map((o,i) => {
+        const id = Number(o.id_pemesanan ?? o.id);
+        const evaluasi = evaluations.find(e => Number(e.id_pemesanan) === id);
+        return `<article style="border:1px solid var(--border);border-radius:14px;padding:16px;background:#fff">
+          <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center">
+            <div><div style="font-size:11px;color:var(--muted)">Penyewaan #${i+1}</div><strong style="font-size:14px;color:#1E3623">${esc(o.kode_pemesanan || id || '-')}</strong></div>
+            ${statusBadge(o.status_pemesanan || o.status)}
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin:15px 0">
+            <div><div class="profile-label">Tanggal Sewa</div><strong>${esc(o.tanggal_sewa || o.created_at || '-')}</strong></div>
+            <div><div class="profile-label">Tanggal Kembali</div><strong>${esc(o.tanggal_kembali_rencana || o.tanggal_kembali || '-')}</strong></div>
+            <div><div class="profile-label">Total Pembayaran</div><strong style="color:var(--text-green)">${rupiah(o.total_harga || o.total || 0)}</strong></div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+            <button class="btn btn-outline" onclick="showOrderDetail(${id})"><i class="fa-solid fa-eye"></i> Lihat Detail</button>
+            <button class="btn btn-green" onclick="rentAgain(${id})"><i class="fa-solid fa-rotate-right"></i> Sewa Kembali</button>
+            ${evaluasi
+              ? `<span style="color:#287C35;font-weight:700;font-size:12px">★ ${esc(evaluasi.rating)}/5 · Sudah dinilai</span>`
+              : `<button class="btn btn-outline" onclick="submitEvaluation(${id})"><i class="fa-solid fa-star"></i> Beri Rating</button>`}
+          </div>
+        </article>`;
+      }).join('')}
+    </div>`;
 }
+
+function getOrderItems(detail){
+  const candidates = [detail?.items, detail?.detail, detail?.detail_pemesanan, detail?.rincian, detail?.peralatan, detail?.data?.items];
+  return candidates.find(Array.isArray) || [];
+}
+
+async function showOrderDetail(id){
+  try{
+    let result;
+    try { result = await apiFetch(`/pemesanan/${id}`); }
+    catch(err) {
+      const cached = orders.find(o => Number(o.id_pemesanan ?? o.id) === Number(id));
+      if(!cached) throw err;
+      result = {data:cached};
+    }
+    const detail = unwrap(result);
+    const order = detail.pemesanan || detail.pesanan || detail.order || detail;
+    const items = getOrderItems(detail).length ? getOrderItems(detail) : getOrderItems(order);
+    const itemRows = items.length ? items.map((item,i) => {
+      const nama = item.nama_alat || item.nama_peralatan || item.nama || item.name || `Peralatan ${i+1}`;
+      const jumlah = item.jumlah || item.qty || item.kuantitas || 1;
+      const harga = item.harga_sewa || item.harga || item.subtotal || 0;
+      return `<tr><td>${esc(nama)}</td><td>${esc(jumlah)}</td><td>${rupiah(harga)}</td></tr>`;
+    }).join('') : '<tr><td colspan="3">Rincian barang tidak tersedia dari server.</td></tr>';
+
+    const modal = document.createElement('div');
+    modal.id='orderDetailModal';
+    modal.style.cssText='position:fixed;inset:0;background:#0008;z-index:2000;display:grid;place-items:center;padding:18px';
+    modal.innerHTML=`<section style="background:white;border-radius:16px;width:min(680px,100%);max-height:85vh;overflow:auto;padding:22px">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:16px"><h2 style="font-size:19px">Detail Penyewaan</h2><button class="btn btn-outline" onclick="document.getElementById('orderDetailModal').remove()">Tutup ✕</button></div>
+      <div class="profile-grid" style="margin-bottom:18px">
+        <div><div class="profile-label">Nomor Pesanan</div><div class="profile-value">${esc(order.kode_pemesanan || order.id_pemesanan || id)}</div></div>
+        <div><div class="profile-label">Status</div><div class="profile-value">${esc(order.status_pemesanan || order.status || '-')}</div></div>
+        <div><div class="profile-label">Tanggal Sewa</div><div class="profile-value">${esc(order.tanggal_sewa || '-')}</div></div>
+        <div><div class="profile-label">Rencana Kembali</div><div class="profile-value">${esc(order.tanggal_kembali_rencana || order.tanggal_kembali || '-')}</div></div>
+        <div><div class="profile-label">Total</div><div class="profile-value">${rupiah(order.total_harga || order.total || 0)}</div></div>
+      </div>
+      <h3 style="margin:12px 0">Rincian Peralatan</h3>
+      <div class="table-wrap"><table><thead><tr><th>Nama Peralatan</th><th>Jumlah</th><th>Harga/Subtotal</th></tr></thead><tbody>${itemRows}</tbody></table></div>
+    </section>`;
+    modal.addEventListener('click',e=>{if(e.target===modal)modal.remove()});
+    document.body.appendChild(modal);
+  }catch(error){ alert('Detail penyewaan gagal dimuat: '+error.message); }
+}
+
+async function rentAgain(id){
+  try{
+    let result = await apiFetch(`/pemesanan/${id}`);
+    const detail = unwrap(result);
+    const order = detail.pemesanan || detail.pesanan || detail.order || detail;
+    const items = getOrderItems(detail).length ? getOrderItems(detail) : getOrderItems(order);
+    if(!items.length){
+      alert('Rincian barang dari pesanan lama tidak tersedia. Silakan pilih kembali peralatan dari katalog.');
+      showPage('sewa');
+      return;
+    }
+    if(!products.length) await loadProducts();
+    let added=0;
+    for(const item of items){
+      const productId = item.id_alat ?? item.id_peralatan ?? item.alat_id ?? item.id;
+      const qty = Math.max(1, Number(item.jumlah ?? item.qty ?? item.kuantitas ?? 1));
+      const product = products.find(p=>String(getId(p))===String(productId));
+      if(!product || getStock(product)<=0) continue;
+      const existing = cart.find(c=>String(c.id)===String(productId));
+      const currentQty = existing ? existing.qty : 0;
+      const finalQty = Math.min(currentQty+qty,getStock(product));
+      if(existing) existing.qty=finalQty;
+      else cart.push({id:String(productId),qty:finalQty});
+      added++;
+    }
+    if(!added){
+      alert('Peralatan dari pesanan lama sedang tidak tersedia. Silakan pilih peralatan lain.');
+      showPage('sewa');
+      return;
+    }
+    setCart();
+    alert('Peralatan dari penyewaan sebelumnya sudah dimasukkan ke keranjang. Silakan cek tanggal dan jumlah sebelum checkout.');
+    showPage('keranjang');
+  }catch(error){ alert('Tidak bisa memuat pesanan untuk disewa kembali: '+error.message); }
+}
+
 function getKtpImageUrl(u){
  return u.foto_ktp_url||u.foto_ktp||u.ktp_image_url||u.foto_ktp_path||'';
 }
